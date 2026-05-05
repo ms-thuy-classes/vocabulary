@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>VocabMaster Pro - IELTS • TOEIC • School Vocabulary</title>
-  
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -31,267 +29,802 @@
       }
     }
   </script>
-  
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/sidebar.css">
-  <link rel="stylesheet" href="css/pages.css">
+  <!-- Firebase SDK v9 Compat -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  
+  <style>
+    :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05); }
+    .dark { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-muted: #94a3b8; --border: #334155; --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -4px rgba(0,0,0,0.2); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; transition: background 0.4s, color 0.4s; overflow-x: hidden; min-height: 100vh; }
+    .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); }
+    .dark .glass { background: rgba(30,41,59,0.7); border: 1px solid rgba(51,65,85,0.5); }
+    .card { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .input { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 0.75rem 1rem; color: var(--text); transition: all 0.3s; outline: none; width: 100%; }
+    .input:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,0.2); }
+    .btn { background: linear-gradient(135deg, #818cf8, #a78bfa); color: white; border: none; border-radius: 12px; padding: 0.75rem 1.5rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(129,140,248,0.4); }
+    .btn:active { transform: translateY(0); }
+    .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: #818cf8; color: #818cf8; box-shadow: 0 4px 12px rgba(129,140,248,0.15); }
+    .btn-danger { background: linear-gradient(135deg, #ef4444, #f97316); }
+    .badge { border-radius: 999px; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 600; }
+    .blob { position: fixed; border-radius: 50%; filter: blur(70px); opacity: 0.4; z-index: -1; pointer-events: none; }
+    .blob-1 { width: 300px; height: 300px; background: #fbcfe8; animation: blob 7s infinite; top: -100px; left: -50px; }
+    .blob-2 { width: 400px; height: 400px; background: #bfdbfe; animation: blob 9s infinite 1s; bottom: -150px; right: -100px; }
+    .blob-3 { width: 250px; height: 250px; background: #e9d5ff; animation: blob 8s infinite 2s; top: 40%; right: 20%; }
+    .scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+    .flip-card { perspective: 1000px; }
+    .flip-card-inner { transition: transform 0.6s; transform-style: preserve-3d; position: relative; width: 100%; height: 100%; }
+    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+    .flip-card-front, .flip-card-back { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+    .flip-card-back { transform: rotateY(180deg); }
+    .star-active { color: #fbbf24 !important; transform: scale(1.15); transition: 0.2s; }
+    .page { display: none; }
+    .page.active { display: block; animation: slideUp 0.4s ease-out; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 0.5rem 1rem; z-index: 50; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.5rem; border-radius: 12px; transition: all 0.2s; cursor: pointer; color: var(--text-muted); }
+    .nav-item.active { background: linear-gradient(135deg, rgba(129,140,248,0.1), rgba(167,139,250,0.1)); color: #818cf8; }
+    .nav-item:hover { background: rgba(129,140,248,0.05); }
+    .progress-bar { height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #818cf8, #a78bfa); border-radius: 999px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+    .confetti-piece { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: confetti 1s ease-out forwards; }
+    table { width: 100%; border-collapse: collapse; }
+    th { position: sticky; top: 0; background: var(--card); padding: 0.75rem; font-weight: 600; text-align: left; border-bottom: 2px solid var(--border); }
+    td { padding: 0.75rem; border-bottom: 1px solid var(--border); }
+    tr:hover td { background: rgba(129,140,248,0.05); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal-content { background: var(--card); border-radius: 20px; padding: 1.5rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease-out; }
+    .toast { position: fixed; top: 1rem; right: 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.5rem; z-index: 101; animation: slideUp 0.3s ease-out; box-shadow: var(--shadow-lg); border-left: 4px solid #10b981; }
+    .toast.error { border-left-color: #ef4444; }
+
+    /* ===== SIDEBAR SYSTEM ===== */
+    #sidebarOverlay { transition: opacity 0.3s; }
+    #sidebar { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), width 0.3s cubic-bezier(0.4,0,0.2,1), padding 0.3s; }
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    body.sidebar-open { overflow: hidden; }
+    @media (min-width: 768px) {
+      #sidebar { transform: translateX(0); width: 16rem; padding-left: 1rem; padding-right: 1rem; }
+      main { margin-left: 16rem; transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1); }
+    }
+    html.sidebar-collapsed #sidebar { width: 5rem !important; padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    html.sidebar-collapsed main { margin-left: 5rem; }
+    html.sidebar-collapsed .sidebar-text { opacity: 0; width: 0; pointer-events: none; transition: opacity 0.2s; display: inline-block; overflow: hidden; white-space: nowrap; }
+    html.sidebar-collapsed .nav-item-desktop { justify-content: center; padding: 0.75rem; }
+    html.sidebar-collapsed #collapseBtn { transform: rotate(180deg); }
+    @media (min-width: 768px) {
+      html.sidebar-collapsed #sidebar:hover { width: 16rem !important; box-shadow: var(--shadow-lg); padding-left: 1rem; padding-right: 1rem; }
+      html.sidebar-collapsed #sidebar:hover .sidebar-text { opacity: 1; width: auto; pointer-events: auto; transition-delay: 0.1s; }
+      html.sidebar-collapsed #sidebar:hover .nav-item-desktop { justify-content: flex-start; padding: 0.625rem 0.75rem; }
+      html.sidebar-collapsed #sidebar:hover #collapseBtn { transform: rotate(0deg); right: -15px; }
+    }
+    .nav-item-desktop.active { background: linear-gradient(135deg, rgba(129,140,248,0.15), rgba(167,139,250,0.1)); color: #818cf8; }
+    
+    /* Firebase Status */
+    #firebaseStatus { position: fixed; top: 0.75rem; right: 0.75rem; z-index: 100; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 999px; background: var(--card); border: 1px solid var(--border); font-size: 0.75rem; }
+    #statusDot { width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; }
+    #statusDot.green { background: #22c55e; }
+    #statusDot.red { background: #ef4444; }
+  </style>
 </head>
 <body>
-  <!-- Background Blobs -->
+  <!-- Blobs -->
   <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
   <div class="confetti-container" id="confetti"></div>
-  <div class="toast-container" id="toasts"></div>
-  <div id="firebaseStatus" class="firebase-status"><span class="status-dot" id="statusDot"></span><span id="statusText">Đang kết nối...</span></div>
+  <div id="firebaseStatus"><span id="statusDot"></span><span id="statusText">Đang kết nối Firebase...</span></div>
 
-  <!-- Auth Modal -->
-  <div id="authModal" class="modal-overlay">
-    <div class="modal-content">
-      <h2 class="text-xl font-bold mb-4 text-center">🔐 Đăng nhập để đồng bộ</h2>
-      <p class="text-gray-500 text-center mb-6 text-sm">Dữ liệu sẽ được lưu trên Firebase và đồng bộ trên mọi thiết bị.</p>
-      <div class="space-y-3">
-        <button onclick="Auth.signInWithGoogle()" class="btn w-full justify-center">
-          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#4285F4" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#34A853" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Tiếp tục với Google
-        </button>
-        <div class="text-center text-sm text-gray-400">hoặc</div>
-        <input type="email" id="authEmail" placeholder="Email" class="input">
-        <input type="password" id="authPass" placeholder="Mật khẩu" class="input">
-        <div class="flex gap-2">
-          <button onclick="Auth.signInWithEmail()" class="btn flex-1">Đăng nhập</button>
-          <button onclick="Auth.signUpWithEmail()" class="btn-outline flex-1">Đăng ký</button>
-        </div>
-      </div>
-      <button onclick="UI.Modals.close('authModal')" class="mt-4 w-full text-center text-sm text-gray-500 hover:text-gray-700">Đóng</button>
-    </div>
-  </div>
-
-  <!-- Sidebar Overlay -->
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <!-- Sidebar Overlay (Mobile) -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 opacity-0 pointer-events-none md:hidden"></div>
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="sidebar">
-    <button id="closeSidebarBtn" class="sidebar-close-btn">✕</button>
-    <div class="sidebar-header">
-      <div class="logo">V</div>
-      <span class="sidebar-text logo-text">VocabMaster</span>
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 p-4 z-40 glass flex flex-col overflow-hidden">
+    <button id="closeSidebarBtn" class="md:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Đóng menu">✕</button>
+    <div class="flex items-center gap-3 px-2 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">V</div>
+      <span class="sidebar-text font-bold text-xl bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent whitespace-nowrap">VocabMaster</span>
     </div>
-    <nav class="sidebar-nav">
-      <button onclick="UI.Navigation.showPage('dashboard')" class="nav-item" data-page="dashboard">📊 <span class="sidebar-text">Dashboard</span></button>
-      <button onclick="UI.Navigation.showPage('vocabulary')" class="nav-item" data-page="vocabulary">📚 <span class="sidebar-text">Từ vựng</span></button>
-      <button onclick="UI.Navigation.showPage('topics')" class="nav-item" data-page="topics">🏷️ <span class="sidebar-text">Chủ đề</span></button>
-      <button onclick="UI.Navigation.showPage('starred')" class="nav-item" data-page="starred">⭐ <span class="sidebar-text">Đã đánh dấu</span></button>
-      <button onclick="UI.Navigation.showPage('flashcards')" class="nav-item" data-page="flashcards">🃏 <span class="sidebar-text">Flashcard</span></button>
-      <button onclick="UI.Navigation.showPage('quiz')" class="nav-item" data-page="quiz">📝 <span class="sidebar-text">Quiz</span></button>
-      <button onclick="UI.Navigation.showPage('progress')" class="nav-item" data-page="progress">📈 <span class="sidebar-text">Tiến trình</span></button>
+    <nav class="flex-1 space-y-1 scrollbar">
+      <button onclick="showPage('dashboard')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all" data-page="dashboard">📊 <span class="sidebar-text whitespace-nowrap">Dashboard</span></button>
+      <button onclick="showPage('vocabulary')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all" data-page="vocabulary">📚 <span class="sidebar-text whitespace-nowrap">Từ vựng</span></button>
+      <button onclick="showPage('topics')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all" data-page="topics">🏷️ <span class="sidebar-text whitespace-nowrap">Chủ đề</span></button>
+      <button onclick="showPage('starred')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all" data-page="starred">⭐ <span class="sidebar-text whitespace-nowrap">Đã đánh dấu</span></button>
+      <button onclick="showPage('flashcards')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all" data-page="flashcards">🃏 <span class="sidebar-text whitespace-nowrap">Flashcard</span></button>
+      <button onclick="showPage('quiz')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all" data-page="quiz">📝 <span class="sidebar-text whitespace-nowrap">Quiz</span></button>
+      <button onclick="showPage('progress')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all" data-page="progress">📈 <span class="sidebar-text whitespace-nowrap">Tiến trình</span></button>
     </nav>
-    <div class="sidebar-footer">
-      <button onclick="UI.Navigation.showPage('settings')" class="nav-item" data-page="settings">⚙️ <span class="sidebar-text">Cài đặt</span></button>
-      <button id="themeToggleDesktop" onclick="UI.Theme.toggle()" class="nav-item">🌙 <span class="sidebar-text">Chế độ tối</span></button>
-      <button id="authBtn" onclick="Auth.toggleModal()" class="nav-item">🔐 <span class="sidebar-text" id="authText">Đăng nhập</span></button>
+    <div class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+      <button onclick="showPage('settings')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all" data-page="settings">⚙️ <span class="sidebar-text whitespace-nowrap">Cài đặt</span></button>
+      <button id="themeToggleDesktop" onclick="toggleTheme()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-800">🌙 <span class="sidebar-text whitespace-nowrap">Chế độ tối</span></button>
     </div>
-    <button id="collapseBtn" class="sidebar-collapse-btn" aria-label="Thu nhỏ sidebar">◀</button>
+    <button id="collapseBtn" class="hidden md:flex absolute -right-3 top-24 w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full items-center justify-center shadow-md z-50 transition-transform hover:scale-110" aria-label="Thu nhỏ sidebar">◀</button>
   </aside>
 
   <!-- Main Content -->
-  <main class="main-content">
-    <header class="header">
-      <button id="hamburgerBtn" class="hamburger-btn">☰</button>
-      <div class="search-box">
-        <input type="text" id="searchInput" oninput="Features.Vocabulary.handleSearch(this.value)" placeholder="Tìm kiếm từ vựng...">
-        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+  <main class="pb-20 md:pb-4 min-h-screen">
+    <header class="sticky top-0 z-30 p-4 md:px-8">
+      <div class="glass rounded-2xl p-3 flex items-center gap-4">
+        <button id="hamburgerBtn" class="md:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0" aria-label="Mở menu">☰</button>
+        <div class="flex-1 relative">
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Tìm kiếm từ vựng..." class="input pr-10 py-2.5 bg-gray-50 dark:bg-gray-800 border-0">
+          <svg class="w-5 h-5 absolute right-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <button onclick="showToast('🔔 Hãy học 5 từ vựng hôm nay!')" class="relative p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0">🔔</button>
+        <div class="flex items-center gap-2 flex-shrink-0"><div class="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-400 to-purple-400 flex items-center justify-center text-white font-semibold text-sm">U</div></div>
       </div>
-      <button onclick="UI.Toast.show('🔔 Hãy học 5 từ vựng hôm nay!')" class="notif-btn">🔔</button>
-      <div class="user-avatar">U</div>
     </header>
 
-    <div class="page-container">
+    <div class="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       <!-- DASHBOARD -->
       <div id="dashboard" class="page active">
-        <h1 class="page-title">📊 Dashboard</h1>
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-label">Tổng từ vựng</div><div class="stat-value" id="totalWords">0</div></div>
-          <div class="stat-card"><div class="stat-label">Đã thuộc</div><div class="stat-value text-green" id="learnedWords">0</div></div>
-          <div class="stat-card"><div class="stat-label">Đánh dấu ⭐</div><div class="stat-value text-yellow" id="starredCount">0</div></div>
-          <div class="stat-card"><div class="stat-label">Điểm trung bình</div><div class="stat-value text-indigo" id="avgScore">0%</div></div>
+        <h1 class="text-3xl font-bold mb-6">📊 Dashboard</h1>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div class="card p-5"><div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Tổng từ vựng</div><div class="text-2xl font-bold" id="totalWords">0</div></div>
+          <div class="card p-5"><div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Đã thuộc</div><div class="text-2xl font-bold text-green-500" id="learnedWords">0</div></div>
+          <div class="card p-5"><div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Đánh dấu ⭐</div><div class="text-2xl font-bold text-yellow-500" id="starredCount">0</div></div>
+          <div class="card p-5"><div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Điểm trung bình</div><div class="text-2xl font-bold text-indigo-500" id="avgScore">0%</div></div>
         </div>
-        <div class="charts-grid">
-          <div class="card chart-card"><h3>📈 Progress 7 ngày qua</h3><div class="chart" id="weeklyChart"></div></div>
-          <div class="card chart-card"><h3>🎯 Học tập liên tiếp</h3><div class="streak"><span class="streak-value" id="streakDays">0</span><span class="streak-label">ngày liên tiếp</span></div></div>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="card p-6"><h3 class="font-semibold mb-4">📈 Progress 7 ngày qua</h3><div class="flex items-end gap-2 h-40" id="weeklyChart"></div></div>
+          <div class="card p-6"><h3 class="font-semibold mb-4">🎯 Học tập liên tiếp</h3><div class="text-center py-6"><div class="text-5xl font-bold text-orange-500" id="streakDays">0</div><div class="text-gray-500 mt-2">ngày liên tiếp</div></div></div>
         </div>
       </div>
 
       <!-- VOCABULARY -->
       <div id="vocabulary" class="page">
-        <div class="page-header">
-          <h1 class="page-title">📚 Từ vựng</h1>
-          <div class="filters">
-            <select id="filterTopic" onchange="Features.Vocabulary.render()" class="input-sm"><option value="">Tất cả chủ đề</option></select>
-            <select id="filterPos" onchange="Features.Vocabulary.render()" class="input-sm"><option value="">Từ loại</option><option value="Noun">Noun</option><option value="Verb">Verb</option><option value="Adjective">Adjective</option><option value="Adverb">Adverb</option></select>
-            <button onclick="Features.Vocabulary.openModal()" class="btn">➕ Thêm</button>
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <h1 class="text-3xl font-bold">📚 Từ vựng</h1>
+          <div class="flex gap-2">
+            <select id="filterTopic" onchange="renderVocabulary()" class="input w-auto bg-white dark:bg-gray-800"><option value="">Tất cả chủ đề</option></select>
+            <select id="filterPos" onchange="renderVocabulary()" class="input w-auto bg-white dark:bg-gray-800"><option value="">Tất cả từ loại</option><option value="Noun">Noun</option><option value="Verb">Verb</option><option value="Adjective">Adjective</option><option value="Adverb">Adverb</option><option value="Other">Other</option></select>
+            <button onclick="openAddVocabModal()" class="btn">➕ Thêm từ</button>
           </div>
         </div>
-        <div class="card table-card">
-          <div class="table-scroll">
-            <table class="data-table">
-              <thead><tr><th>STT</th><th>Chủ đề</th><th>Từ vựng</th><th class="hidden md:table-cell">IPA</th><th>Loại</th><th>Nghĩa</th><th class="hidden lg:table-cell">Ví dụ</th><th>🔊</th><th>⭐</th><th>Hành động</th></tr></thead>
+        <div class="card overflow-hidden">
+          <div class="overflow-x-auto scrollbar">
+            <table id="vocabTable">
+              <thead><tr><th class="w-8"></th><th onclick="sortVocab('index')">STT ↕</th><th>Chủ đề</th><th onclick="sortVocab('word')">Từ vựng ↕</th><th>IPA</th><th>Từ loại</th><th>Nghĩa tiếng Việt</th><th class="hidden md:table-cell">Đồng nghĩa</th><th class="hidden lg:table-cell">Ví dụ</th><th>Audio</th><th>⭐</th><th>Hành động</th></tr></thead>
               <tbody id="vocabTableBody"></tbody>
             </table>
           </div>
-          <div class="table-footer">
-            <span id="paginationInfo">0 từ</span>
-            <div class="pagination"><button onclick="Features.Vocabulary.changePage(-1)" class="btn-sm">←</button><button onclick="Features.Vocabulary.changePage(1)" class="btn-sm">→</button></div>
+          <div class="p-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
+            <span class="text-sm text-gray-500" id="paginationInfo">Hiển thị 0/0 từ</span>
+            <div class="flex gap-2"><button onclick="changePage(-1)" class="btn-outline px-3 py-1.5 rounded-lg text-sm">Trước</button><button onclick="changePage(1)" class="btn-outline px-3 py-1.5 rounded-lg text-sm">Sau</button></div>
           </div>
         </div>
       </div>
 
       <!-- TOPICS -->
       <div id="topics" class="page">
-        <div class="page-header">
-          <h1 class="page-title">🏷️ Chủ đề</h1>
-          <button onclick="Features.Topics.openModal()" class="btn">➕ Tạo mới</button>
-        </div>
-        <div class="grid topics-grid" id="topicsGrid"></div>
+        <div class="flex items-center justify-between mb-6"><h1 class="text-3xl font-bold">🏷️ Chủ đề</h1><button onclick="openAddTopicModal()" class="btn">➕ Tạo chủ đề</button></div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="topicsGrid"></div>
       </div>
 
       <!-- STARRED -->
       <div id="starred" class="page">
-        <div class="page-header">
-          <h1 class="page-title">⭐ Đã đánh dấu</h1>
-          <div class="actions">
-            <button onclick="Features.Quiz.init();UI.Navigation.showPage('quiz')" class="btn">📝 Tạo Quiz</button>
-            <button onclick="Features.Flashcards.init();UI.Navigation.showPage('flashcards')" class="btn-outline">🃏 Flashcard</button>
-          </div>
-        </div>
-        <div class="grid starred-grid" id="starredList"></div>
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6"><h1 class="text-3xl font-bold">⭐ Từ đánh dấu</h1><div class="flex gap-2"><button onclick="generateQuiz()" class="btn">📝 Tạo Quiz</button><button onclick="generateFlashcards()" class="btn">🃏 Flashcard</button></div></div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="starredList"></div>
       </div>
 
       <!-- FLASHCARDS -->
       <div id="flashcards" class="page">
-        <h1 class="page-title">🃏 Flashcard</h1>
-        <div id="noFlashcards" class="empty-state"><div class="empty-icon">🃏</div><p>Chưa có từ nào. Đánh dấu ⭐ từ vựng để tạo flashcard.</p></div>
-        <div id="flashcardActive" class="flashcard-wrapper hidden">
-          <div class="flashcard-progress"><span id="fcProgress"></span><div class="progress-bar"><div class="progress-fill" id="fcProgressBar"></div></div></div>
-          <div class="flip-card" id="flipCard" onclick="Features.Flashcards.flip()"><div class="flip-inner"><div class="flip-front card"><div id="fcWord" class="fc-word"></div><div id="fcIpa" class="fc-ipa"></div><button onclick="event.stopPropagation();TTS.speak(document.getElementById('fcWord').textContent)" class="btn-circle">🔊</button></div><div class="flip-back card"><div id="fcMeaning" class="fc-meaning"></div><div id="fcExample" class="fc-example"></div></div></div></div>
-          <div class="flashcard-controls">
-            <button onclick="Features.Flashcards.navigate(-1)" class="btn-outline">⬅ Trước</button>
-            <button onclick="Features.Flashcards.shuffle()" class="btn-outline">🔀 Trộn</button>
-            <button onclick="Features.Flashcards.markLearned()" class="btn">✓ Thuộc</button>
-            <button onclick="Features.Flashcards.navigate(1)" class="btn-outline">Tiếp ➡</button>
+        <h1 class="text-3xl font-bold mb-6">🃏 Flashcard</h1>
+        <div id="flashcardContainer" class="max-w-lg mx-auto">
+          <div id="noFlashcards" class="text-center py-12"><div class="text-6xl mb-4">🃏</div><p class="text-gray-500">Chưa có từ nào. Hãy đánh dấu ⭐ từ vựng để tạo flashcard.</p></div>
+          <div id="flashcardActive" class="hidden">
+            <div class="mb-4 text-center"><span id="fcProgress" class="text-sm text-gray-500"></span><div class="progress-bar mt-2 max-w-xs mx-auto"><div class="progress-bar-fill" id="fcProgressBar"></div></div></div>
+            <div class="flip-card h-72 cursor-pointer mb-6" id="flipCard" onclick="flipCard()"><div class="flip-card-inner" id="fcInner"><div class="flip-card-front glass card flex flex-col p-8"><div id="fcWord" class="text-3xl font-bold mb-2"></div><div id="fcIpa" class="text-lg text-gray-500 mb-4"></div><button onclick="event.stopPropagation(); speakWord(document.getElementById('fcWord').textContent)" class="btn-outline p-3 rounded-full">🔊</button></div><div class="flip-card-back glass card flex flex-col p-8"><div id="fcMeaning" class="text-2xl font-semibold mb-3 text-indigo-500"></div><div id="fcExample" class="text-gray-500 text-center italic"></div></div></div></div>
+            <div class="flex justify-center gap-3 flex-wrap"><button onclick="navigateFlashcard(-1)" class="btn-outline p-3 rounded-xl">⬅ Trước</button><button onclick="shuffleFlashcards()" class="btn-outline p-3 rounded-xl">🔀 Trộn</button><button onclick="markLearned()" class="btn p-3 rounded-xl">✓ Thuộc</button><button onclick="navigateFlashcard(1)" class="btn-outline p-3 rounded-xl">Tiếp ➡</button></div>
           </div>
         </div>
       </div>
 
       <!-- QUIZ -->
       <div id="quiz" class="page">
-        <h1 class="page-title">📝 Quiz</h1>
-        <div id="quizSetup" class="card quiz-setup">
-          <h3>Tạo Quiz từ từ ⭐</h3>
-          <p id="quizWordCount" class="text-muted">0 từ sẵn có</p>
-          <div class="quiz-options">
-            <label><input type="radio" name="qtype" value="meaning" checked> Chọn nghĩa</label>
-            <label><input type="radio" name="qtype" value="synonym"> Đồng nghĩa</label>
-            <label><input type="radio" name="qtype" value="fillblank"> Điền từ</label>
-            <label><input type="radio" name="qtype" value="listening"> Nghe chọn</label>
+        <h1 class="text-3xl font-bold mb-6">📝 Quiz</h1>
+        <div id="quizSetup" class="card p-6 max-w-lg mx-auto">
+          <h3 class="font-semibold mb-4">Tạo Quiz từ từ đã đánh dấu ⭐</h3>
+          <p class="text-gray-500 mb-6" id="quizWordCount">0 từ sẵn có</p>
+          <div class="space-y-3 mb-6">
+            <label class="flex items-center gap-3"><input type="radio" name="quizType" value="meaning" checked><span>Chọn nghĩa tiếng Việt</span></label>
+            <label class="flex items-center gap-3"><input type="radio" name="quizType" value="synonym"><span>Ghép đồng nghĩa</span></label>
+            <label class="flex items-center gap-3"><input type="radio" name="quizType" value="fillblank"><span>Điền vào chỗ trống</span></label>
+            <label class="flex items-center gap-3"><input type="radio" name="quizType" value="listening"><span>Nghe chọn đáp án</span></label>
           </div>
-          <div class="quiz-count"><label>Số câu:</label><select id="quizCount" class="input-sm"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option></select></div>
-          <button onclick="Features.Quiz.start()" class="btn w-full" id="quizStartBtn" disabled>Bắt đầu</button>
+          <div class="flex gap-2 mb-4"><label class="text-sm text-gray-500">Số câu:</label><select id="quizCount" class="input w-20 py-1"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option></select></div>
+          <button onclick="startQuiz()" class="btn w-full" id="quizStartBtn" disabled>Bắt đầu Quiz</button>
         </div>
-        <div id="quizActive" class="quiz-active hidden">
-          <div class="quiz-header"><span id="quizCurrentQ">Câu 1</span><span id="quizTimer">⏱ 00:00</span></div>
-          <div class="progress-bar"><div class="progress-fill" id="quizProgressBar"></div></div>
-          <div class="card quiz-card"><div id="quizQuestion" class="quiz-question"></div><div id="quizOptions" class="quiz-options-grid"></div></div>
-          <div id="quizFeedback" class="quiz-feedback hidden"></div>
-          <button onclick="Features.Quiz.next()" class="btn hidden" id="nextQBtn">Tiếp ➡</button>
+        <div id="quizActive" class="hidden max-w-2xl mx-auto">
+          <div class="flex items-center justify-between mb-4"><span id="quizCurrentQ" class="font-semibold">Câu 1/10</span><span id="quizTimer" class="font-mono">⏱ 00:00</span></div>
+          <div class="progress-bar mb-6"><div class="progress-bar-fill" id="quizProgressBar"></div></div>
+          <div class="card p-6"><div id="quizQuestion" class="text-xl font-semibold mb-6 text-center"></div><div id="quizOptions" class="grid gap-3"></div></div>
+          <div id="quizFeedback" class="hidden mt-4 text-center font-semibold text-lg"></div>
+          <div class="flex justify-center mt-4"><button onclick="nextQuestion()" class="btn hidden" id="nextQBtn">Câu tiếp ➡</button></div>
         </div>
-        <div id="quizResult" class="card quiz-result hidden">
-          <div class="result-emoji" id="resultEmoji">🎉</div>
-          <h2>Hoàn thành!</h2>
-          <div class="result-score" id="resultScore">0/0</div>
-          <p id="resultMsg">Xuất sắc!</p>
-          <div class="result-actions"><button onclick="UI.Navigation.showPage('vocabulary')" class="btn-outline">Ôn từ sai</button><button onclick="Features.Quiz.start()" class="btn">Làm lại</button></div>
+        <div id="quizResult" class="hidden max-w-lg mx-auto text-center card p-8">
+          <div class="text-6xl mb-4" id="resultEmoji">🎉</div>
+          <h2 class="text-2xl font-bold mb-2">Hoàn thành!</h2>
+          <div class="text-5xl font-bold text-indigo-500 mb-4" id="resultScore">0/0</div>
+          <p class="text-gray-500 mb-6" id="resultMsg">Xuất sắc!</p>
+          <div class="flex gap-3 justify-center"><button onclick="showPage('vocabulary')" class="btn-outline">📚 Ôn từ sai</button><button onclick="startQuiz()" class="btn">🔄 Làm lại</button></div>
         </div>
       </div>
 
       <!-- PROGRESS -->
       <div id="progress" class="page">
-        <h1 class="page-title">📈 Tiến trình</h1>
-        <div class="grid progress-grid">
-          <div class="card"><h3>Hoàn thành theo chủ đề</h3><div id="topicProgress" class="progress-list"></div></div>
-          <div class="card"><h3>Lịch sử Quiz</h3><div id="quizHistory" class="history-list"></div></div>
+        <h1 class="text-3xl font-bold mb-6">📈 Tiến trình</h1>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="card p-6"><h3 class="font-semibold mb-4">Hoàn thành theo chủ đề</h3><div id="topicProgress" class="space-y-3"></div></div>
+          <div class="card p-6"><h3 class="font-semibold mb-4">Lịch sử Quiz</h3><div id="quizHistory" class="space-y-3"></div></div>
         </div>
       </div>
 
       <!-- SETTINGS -->
       <div id="settings" class="page">
-        <h1 class="page-title">⚙️ Cài đặt</h1>
-        <div class="settings-grid">
-          <div class="card"><h3>Giao diện</h3><div class="setting-row"><span>Chế độ tối</span><button onclick="UI.Theme.toggle()" class="btn-sm" id="themeToggleBtn">Bật</button></div></div>
-          <div class="card"><h3>Đồng bộ Firebase</h3><div class="setting-actions"><button onclick="FirebaseService.syncUp()" class="btn-sm">🔄 Đồng bộ lên</button><button onclick="FirebaseService.syncDown()" class="btn-sm">⬇️ Tải về</button><button onclick="FirebaseService.clear()" class="btn-sm btn-danger">🗑️ Xóa cloud</button></div><p class="text-xs text-muted mt-2">Dữ liệu local vẫn được giữ.</p></div>
-          <div class="card"><h3>Dữ liệu Local</h3><div class="setting-actions"><button onclick="Storage.exportData()" class="btn-sm">📤 Xuất JSON</button><label class="btn-sm cursor-pointer">📥 Nhập<input type="file" accept=".json" onchange="Storage.importData(event)" class="hidden"></label><button onclick="Features.Dashboard.loadDemo()" class="btn-sm">📦 Demo</button><button onclick="Storage.clearAll()" class="btn-sm btn-danger">🗑️ Xóa local</button></div></div>
+        <h1 class="text-3xl font-bold mb-6">⚙️ Cài đặt</h1>
+        <div class="max-w-lg space-y-4">
+          <div class="card p-6"><h3 class="font-semibold mb-4">Giao diện</h3><div class="flex items-center justify-between"><span>Chế độ tối</span><button onclick="toggleTheme()" class="btn-outline px-4 py-2 rounded-lg text-sm" id="themeToggleBtn">Bật</button></div></div>
+          <div class="card p-6"><h3 class="font-semibold mb-4">Đồng bộ Firebase</h3><div class="flex gap-3 flex-wrap">
+            <button onclick="syncToFirebase()" class="btn-outline px-4 py-2 rounded-lg text-sm">🔄 Đồng bộ lên</button>
+            <button onclick="syncFromFirebase()" class="btn-outline px-4 py-2 rounded-lg text-sm">⬇️ Tải về</button>
+            <button onclick="clearFirebase()" class="btn btn-danger px-4 py-2 rounded-lg text-sm">🗑️ Xóa trên Firebase</button>
+          </div><p class="text-xs text-gray-500 mt-2">Dữ liệu local vẫn được giữ. Đồng bộ giúp backup và dùng trên nhiều thiết bị.</p></div>
+          <div class="card p-6"><h3 class="font-semibold mb-4">Dữ liệu Local</h3><div class="flex gap-3 flex-wrap">
+            <button onclick="exportData()" class="btn-outline px-4 py-2 rounded-lg text-sm">📤 Xuất JSON</button>
+            <label class="btn-outline px-4 py-2 rounded-lg text-sm cursor-pointer">📥 Nhập<input type="file" accept=".json" onchange="importData(event)" class="hidden"></label>
+            <button onclick="loadDemoData()" class="btn-outline px-4 py-2 rounded-lg text-sm">📦 Demo data</button>
+            <button onclick="clearAllData()" class="btn btn-danger px-4 py-2 rounded-lg text-sm">🗑️ Xóa tất cả</button>
+          </div></div>
         </div>
       </div>
     </div>
   </main>
 
   <!-- Mobile Bottom Nav -->
-  <nav class="bottom-nav">
-    <button onclick="UI.Navigation.showPage('dashboard')" class="nav-tab">📊<span>Home</span></button>
-    <button onclick="UI.Navigation.showPage('vocabulary')" class="nav-tab">📚<span>Từ vựng</span></button>
-    <button onclick="UI.Navigation.showPage('flashcards')" class="nav-tab">🃏<span>Flashcard</span></button>
-    <button onclick="UI.Navigation.showPage('quiz')" class="nav-tab">📝<span>Quiz</span></button>
-    <button onclick="UI.Navigation.showPage('settings')" class="nav-tab">⚙️<span>Cài đặt</span></button>
+  <nav class="bottom-nav md:hidden">
+    <div class="flex justify-around items-center max-w-md mx-auto">
+      <button onclick="showPage('dashboard')" class="nav-item">📊<span class="text-xs">Home</span></button>
+      <button onclick="showPage('vocabulary')" class="nav-item">📚<span class="text-xs">Từ vựng</span></button>
+      <button onclick="showPage('flashcards')" class="nav-item">🃏<span class="text-xs">Flashcard</span></button>
+      <button onclick="showPage('quiz')" class="nav-item">📝<span class="text-xs">Quiz</span></button>
+      <button onclick="showPage('settings')" class="nav-item">⚙️<span class="text-xs">Cài đặt</span></button>
+    </div>
   </nav>
 
-  <!-- Modals -->
-  <div id="vocabModal" class="modal-overlay" onclick="if(event.target===this)UI.Modals.close('vocabModal')">
+  <!-- MODALS -->
+  <div id="vocabModal" class="modal-overlay" onclick="if(event.target===this)closeModal('vocabModal')">
     <div class="modal-content">
-      <h2 id="vocabTitle" class="modal-title">Thêm từ vựng</h2>
+      <h2 class="text-xl font-bold mb-4" id="vocabModalTitle">Thêm từ vựng</h2>
       <input type="hidden" id="editVocabId">
-      <div class="form-grid">
-        <select id="vTopic" class="input"><option value="">Chọn chủ đề</option></select>
-        <input type="text" id="vWord" placeholder="Từ vựng *" class="input">
-        <input type="text" id="vIpa" placeholder="IPA /fəˈnetɪk/" class="input">
-        <select id="vPos" class="input"><option value="">Từ loại</option><option value="Noun">Noun</option><option value="Verb">Verb</option><option value="Adjective">Adjective</option><option value="Adverb">Adverb</option></select>
-        <input type="text" id="vMean" placeholder="Nghĩa tiếng Việt *" class="input">
-        <input type="text" id="vSyn" placeholder="Đồng nghĩa" class="input">
-        <textarea id="vEx" placeholder="Ví dụ" class="input" rows="2"></textarea>
+      <div class="space-y-3">
+        <select id="vocabTopic" class="input"><option value="">Chọn chủ đề</option></select>
+        <input type="text" id="vocabWord" placeholder="Từ vựng *" class="input">
+        <input type="text" id="vocabIpa" placeholder="IPA /fəˈnetɪk/" class="input">
+        <select id="vocabPos" class="input"><option value="">Từ loại</option><option value="Noun">Noun</option><option value="Verb">Verb</option><option value="Adjective">Adjective</option><option value="Adverb">Adverb</option><option value="Other">Other</option></select>
+        <input type="text" id="vocabMeaning" placeholder="Nghĩa tiếng Việt *" class="input">
+        <input type="text" id="vocabSynonym" placeholder="Đồng nghĩa" class="input">
+        <textarea id="vocabExample" placeholder="Ví dụ" class="input" rows="2"></textarea>
+        <div class="flex gap-2 pt-2"><button onclick="saveVocabulary()" class="btn flex-1">💾 Lưu</button><button onclick="closeModal('vocabModal')" class="btn-outline flex-1">Hủy</button></div>
       </div>
-      <div class="modal-actions"><button onclick="Features.Vocabulary.save()" class="btn">💾 Lưu</button><button onclick="UI.Modals.close('vocabModal')" class="btn-outline">Hủy</button></div>
     </div>
   </div>
 
-  <div id="topicModal" class="modal-overlay" onclick="if(event.target===this)UI.Modals.close('topicModal')">
+  <div id="topicModal" class="modal-overlay" onclick="if(event.target===this)closeModal('topicModal')">
     <div class="modal-content">
-      <h2 id="topicTitle" class="modal-title">Tạo chủ đề</h2>
+      <h2 class="text-xl font-bold mb-4" id="topicModalTitle">Tạo chủ đề mới</h2>
       <input type="hidden" id="editTopicId">
-      <input type="text" id="tName" placeholder="Tên chủ đề *" class="input">
-      <div class="color-picker">
-        <div class="color-label">Chọn màu</div>
-        <div class="color-grid">
-          <button onclick="Features.Topics.pickColor('#fbcfe8')" class="color-btn bg-pastel-pink"></button>
-          <button onclick="Features.Topics.pickColor('#bfdbfe')" class="color-btn bg-pastel-blue"></button>
-          <button onclick="Features.Topics.pickColor('#e9d5ff')" class="color-btn bg-pastel-purple"></button>
-          <button onclick="Features.Topics.pickColor('#bbf7d0')" class="color-btn bg-pastel-green"></button>
-          <button onclick="Features.Topics.pickColor('#fef08a')" class="color-btn bg-pastel-yellow"></button>
-          <button onclick="Features.Topics.pickColor('#fed7aa')" class="color-btn bg-pastel-peach"></button>
-          <button onclick="Features.Topics.pickColor('#a7f3d0')" class="color-btn bg-pastel-mint"></button>
-          <button onclick="Features.Topics.pickColor('#ddd6fe')" class="color-btn bg-pastel-lavender"></button>
+      <div class="space-y-3">
+        <input type="text" id="topicName" placeholder="Tên chủ đề *" class="input">
+        <div class="mb-3">
+          <div class="text-sm font-medium mb-2">Chọn màu</div>
+          <div class="grid grid-cols-5 gap-2 mb-2">
+            <button onclick="selectColor('#fbcfe8')" class="w-10 h-10 rounded-lg bg-[#fbcfe8] hover:scale-110 transition-transform"></button>
+            <button onclick="selectColor('#bfdbfe')" class="w-10 h-10 rounded-lg bg-[#bfdbfe] hover:scale-110 transition-transform"></button>
+            <button onclick="selectColor('#e9d5ff')" class="w-10 h-10 rounded-lg bg-[#e9d5ff] hover:scale-110 transition-transform"></button>
+            <button onclick="selectColor('#bbf7d0')" class="w-10 h-10 rounded-lg bg-[#bbf7d0] hover:scale-110 transition-transform"></button>
+            <button onclick="selectColor('#fef08a')" class="w-10 h-10 rounded-lg bg-[#fef08a] hover:scale-110 transition-transform"></button>
+            <button onclick="selectColor('#fed7aa')" class="w-10 h-10 rounded-lg bg-[#fed7aa] hover:scale-110 transition-transform"></button>
+            <button onclick="selectColor('#a7f3d0')" class="w-10 h-10 rounded-lg bg-[#a7f3d0] hover:scale-110 transition-transform"></button>
+            <button onclick="selectColor('#ddd6fe')" class="w-10 h-10 rounded-lg bg-[#ddd6fe] hover:scale-110 transition-transform"></button>
+          </div>
+          <div class="flex gap-2"><input type="color" id="customColor" onchange="selectColor(this.value)" class="w-10 h-10 rounded-lg cursor-pointer"><input type="text" id="hexColor" placeholder="#hex" oninput="selectColor(this.value)" class="input flex-1"></div>
         </div>
-        <div class="color-custom"><input type="color" id="tColor" onchange="Features.Topics.pickColor(this.value)"><input type="text" id="tHex" placeholder="#hex" oninput="Features.Topics.pickColor(this.value)" class="input-sm"></div>
+        <div id="colorPreview" class="h-10 rounded-lg bg-gray-200"></div>
+        <div class="flex gap-2 pt-2"><button onclick="saveTopic()" class="btn flex-1">💾 Lưu</button><button onclick="closeModal('topicModal')" class="btn-outline flex-1">Hủy</button></div>
       </div>
-      <div class="modal-actions"><button onclick="Features.Topics.save()" class="btn">💾 Lưu</button><button onclick="UI.Modals.close('topicModal')" class="btn-outline">Hủy</button></div>
     </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script type="module" src="js/config.js"></script>
-  <script type="module" src="js/app.js"></script>
+  <div id="toastContainer"></div>
+
+  <script>
+    // ===== FIREBASE CONFIG =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyCt1a3SGuac8srDDC76T2I1yGla8tpfbPg",
+      authDomain: "vocab-64644.firebaseapp.com",
+      databaseURL: "https://vocab-64644-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "vocab-64644",
+      storageBucket: "vocab-64644.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const DB_PATH = 'vocab/single-user/data'; // Fixed path for single user
+
+    // ===== STATE =====
+    let state = {
+      vocabulary: [], topics: [], quizHistory: [], learnedWords: [],
+      settings: { darkMode: false, dailyReminder: true },
+      currentPage: 1, pageSize: 20, currentSort: { field: 'createdAt', desc: true },
+      flashcards: [], currentFCIndex: 0, quizQuestions: [], currentQIndex: 0,
+      quizScore: 0, quizTimer: null, quizSeconds: 0, syncPending: false
+    };
+
+    // ===== LOCAL STORAGE =====
+    function saveLocal() {
+      localStorage.setItem('vocabMaster', JSON.stringify({
+        vocabulary: state.vocabulary, topics: state.topics,
+        quizHistory: state.quizHistory, learnedWords: state.learnedWords,
+        settings: state.settings
+      }));
+    }
+    function loadLocal() {
+      const data = localStorage.getItem('vocabMaster');
+      if (data) {
+        const parsed = JSON.parse(data);
+        state.vocabulary = parsed.vocabulary || [];
+        state.topics = parsed.topics || [];
+        state.quizHistory = parsed.quizHistory || [];
+        state.learnedWords = parsed.learnedWords || [];
+        state.settings = { ...state.settings, ...parsed.settings };
+      }
+    }
+
+    // ===== FIREBASE SYNC =====
+    function updateStatus(text, color) {
+      document.getElementById('statusText').textContent = text;
+      document.getElementById('statusDot').className = color ? `status-dot ${color}` : 'status-dot';
+    }
+
+    async function syncToFirebase() {
+      if (state.syncPending) return showToast('Đang đồng bộ...', 'error');
+      state.syncPending = true;
+      updateStatus('Đang tải lên...', 'yellow');
+      try {
+        await db.ref(DB_PATH).set({
+          vocabulary: state.vocabulary, topics: state.topics,
+          quizHistory: state.quizHistory, learnedWords: state.learnedWords,
+          lastSync: firebase.database.ServerValue.TIMESTAMP
+        });
+        updateStatus('Đã đồng bộ ✓', 'green');
+        showToast('✅ Đồng bộ thành công');
+      } catch(e) {
+        console.error(e);
+        updateStatus('Lỗi kết nối', 'red');
+        showToast('❌ Lỗi: ' + e.message, 'error');
+      } finally {
+        state.syncPending = false;
+        setTimeout(() => updateStatus('Online ✓', 'green'), 2000);
+      }
+    }
+
+    async function syncFromFirebase() {
+      updateStatus('Đang tải về...', 'yellow');
+      try {
+        const snap = await db.ref(DB_PATH).once('value');
+        if (snap.exists()) {
+          const data = snap.val();
+          state.vocabulary = data.vocabulary || state.vocabulary;
+          state.topics = data.topics || state.topics;
+          state.quizHistory = data.quizHistory || state.quizHistory;
+          state.learnedWords = data.learnedWords || state.learnedWords;
+          saveLocal();
+          updateStatus('Đã cập nhật ✓', 'green');
+          showToast('✅ Đã tải dữ liệu từ Firebase');
+          showPage('dashboard');
+        } else {
+          showToast('📭 Chưa có dữ liệu trên Firebase');
+          updateStatus('Online ✓', 'green');
+        }
+      } catch(e) {
+        console.error(e);
+        updateStatus('Lỗi kết nối', 'red');
+        showToast('❌ Lỗi: ' + e.message, 'error');
+      } finally {
+        setTimeout(() => updateStatus('Online ✓', 'green'), 2000);
+      }
+    }
+
+    async function clearFirebase() {
+      if (!confirm('Xóa toàn bộ dữ liệu trên Firebase?')) return;
+      try {
+        await db.ref(DB_PATH).remove();
+        showToast('✅ Đã xóa dữ liệu trên Firebase');
+      } catch(e) { showToast('❌ Lỗi: ' + e.message, 'error'); }
+    }
+
+    // Real-time listener
+    function listenToChanges() {
+      db.ref(DB_PATH).on('value', (snap) => {
+        if (snap.exists() && !state.syncPending) {
+          const data = snap.val();
+          if (data.lastSync && (!state.lastRemoteSync || data.lastSync > state.lastRemoteSync)) {
+            state.vocabulary = data.vocabulary || state.vocabulary;
+            state.topics = data.topics || state.topics;
+            state.quizHistory = data.quizHistory || state.quizHistory;
+            state.learnedWords = data.learnedWords || state.learnedWords;
+            state.lastRemoteSync = data.lastSync;
+            saveLocal();
+            if (['vocabulary','topics','dashboard'].includes(state.currentPage)) {
+              if (state.currentPage === 'vocabulary') renderVocabulary();
+              if (state.currentPage === 'dashboard') updateDashboard();
+            }
+            showToast('🔄 Dữ liệu đã cập nhật');
+          }
+        }
+      });
+    }
+
+    // ===== UI HELPERS =====
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+      toast.textContent = msg;
+      document.getElementById('toastContainer').appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(-10px)'; setTimeout(() => toast.remove(), 300); }, 2700);
+    }
+    function showConfetti() {
+      const c = document.getElementById('confetti'); c.innerHTML = '';
+      const colors = ['#fbcfe8','#bfdbfe','#e9d5ff','#bbf7d0','#fef08a','#fed7aa','#a7f3d0','#818cf8'];
+      for(let i=0;i<50;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.background=colors[i%colors.length];p.style.left=Math.random()*100+'%';p.style.top=Math.random()*30+'%';p.style.setProperty('--x',(Math.random()*200-100)+'px');p.style.setProperty('--y',(Math.random()*300+100)+'px');c.appendChild(p);}
+      setTimeout(()=>c.innerHTML='',1500);
+    }
+    function speakWord(w) { if(!window.speechSynthesis)return; window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(w); u.lang='en-US'; u.rate=0.9; window.speechSynthesis.speak(u); }
+    function closeModal(id) { const m = typeof id === 'string' ? document.getElementById(id) : id; if(m) m.classList.remove('show'); }
+
+    // ===== NAVIGATION =====
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId)?.classList.add('active');
+      document.querySelectorAll('.nav-item-desktop').forEach(n => {
+        n.classList.toggle('active', n.dataset.page === pageId);
+        n.style.background = n.dataset.page === pageId ? 'linear-gradient(135deg, rgba(129,140,248,0.1), rgba(167,139,250,0.1))' : '';
+        n.style.color = n.dataset.page === pageId ? '#818cf8' : '';
+      });
+      document.querySelectorAll('.bottom-nav .nav-item').forEach((n, i) => {
+        const pages = ['dashboard','vocabulary','flashcards','quiz','settings'];
+        n.classList.toggle('active', pages[i] === pageId);
+      });
+      window.scrollTo(0, 0);
+      if (pageId === 'dashboard') updateDashboard();
+      if (pageId === 'vocabulary') { renderTopicsDropdown(); renderVocabulary(); }
+      if (pageId === 'topics') renderTopics();
+      if (pageId === 'starred') renderStarred();
+      if (pageId === 'flashcards') initFlashcards();
+      if (pageId === 'quiz') initQuiz();
+      if (pageId === 'progress') updateProgress();
+      if (window.innerWidth < 768) closeSidebar();
+    }
+
+    // ===== THEME =====
+    function toggleTheme() {
+      state.settings.darkMode = !state.settings.darkMode;
+      document.documentElement.classList.toggle('dark', state.settings.darkMode);
+      const icon = state.settings.darkMode ? '☀️' : '🌙';
+      const text = state.settings.darkMode ? 'Chế độ sáng' : 'Chế độ tối';
+      document.getElementById('themeToggleDesktop').innerHTML = `<span>${icon}</span> <span class="sidebar-text whitespace-nowrap">${text}</span>`;
+      document.getElementById('themeToggleBtn').textContent = state.settings.darkMode ? 'Tắt' : 'Bật';
+      saveLocal();
+    }
+
+    // ===== SIDEBAR =====
+    const sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebarOverlay'), hamburgerBtn = document.getElementById('hamburgerBtn'), closeSidebarBtn = document.getElementById('closeSidebarBtn'), collapseBtn = document.getElementById('collapseBtn');
+    function openSidebar() { sidebar.classList.add('open'); overlay.classList.remove('pointer-events-none', 'opacity-0'); document.body.classList.add('sidebar-open'); }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.add('pointer-events-none', 'opacity-0'); document.body.classList.remove('sidebar-open'); }
+    function toggleSidebarCollapse() { if(window.innerWidth < 768) return; document.documentElement.classList.toggle('sidebar-collapsed'); localStorage.setItem('sidebarCollapsed', document.documentElement.classList.contains('sidebar-collapsed')); }
+    hamburgerBtn?.addEventListener('click', openSidebar); closeSidebarBtn?.addEventListener('click', closeSidebar); overlay?.addEventListener('click', closeSidebar); collapseBtn?.addEventListener('click', toggleSidebarCollapse);
+    document.querySelectorAll('#sidebar .nav-item-desktop').forEach(btn => btn.addEventListener('click', () => { if(window.innerWidth < 768) closeSidebar(); }));
+    if(localStorage.getItem('sidebarCollapsed')==='true' && window.innerWidth>=768) document.documentElement.classList.add('sidebar-collapsed');
+    window.addEventListener('resize', () => { if(window.innerWidth<768){closeSidebar();document.documentElement.classList.remove('sidebar-collapsed');} else if(localStorage.getItem('sidebarCollapsed')==='true') document.documentElement.classList.add('sidebar-collapsed'); });
+
+    // ===== TOPICS =====
+    function renderTopicsDropdown() {
+      const selects = [document.getElementById('vocabTopic'), document.getElementById('filterTopic')];
+      selects.forEach(sel => {
+        const val = sel?.value, isFilter = sel === document.getElementById('filterTopic');
+        sel.innerHTML = `<option value="">${isFilter ? 'Tất cả chủ đề' : 'Chọn chủ đề'}</option>` + state.topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+        if(val) sel.value = val;
+      });
+    }
+    function openAddTopicModal(id = null) {
+      document.getElementById('editTopicId').value = id || ''; document.getElementById('topicName').value = '';
+      document.getElementById('topicModalTitle').textContent = id ? 'Sửa chủ đề' : 'Tạo chủ đề mới';
+      document.getElementById('customColor').value = '#fbcfe8'; document.getElementById('hexColor').value = '#fbcfe8';
+      document.getElementById('colorPreview').style.background = '#fbcfe8';
+      if(id) { const t = state.topics.find(x => x.id === id); if(t) { document.getElementById('topicName').value = t.name; selectColor(t.color); } }
+      document.getElementById('topicModal').classList.add('show');
+    }
+    function selectColor(color) { if(!/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(color) && color) return; document.getElementById('customColor').value = color; document.getElementById('hexColor').value = color; document.getElementById('colorPreview').style.background = color; }
+    async function saveTopic() {
+      const name = document.getElementById('topicName').value.trim(), color = document.getElementById('hexColor').value || '#fbcfe8';
+      if(!name) return showToast('Vui lòng nhập tên chủ đề', 'error');
+      const id = document.getElementById('editTopicId').value;
+      if(id) { const t = state.topics.find(x => x.id === id); if(t) { t.name = name; t.color = color; } }
+      else { state.topics.push({ id: Date.now().toString(), name, color, createdAt: Date.now() }); }
+      saveLocal(); closeModal('topicModal'); renderTopics(); renderTopicsDropdown();
+      if(!state.syncPending) syncToFirebase();
+      showToast(id ? 'Đã cập nhật chủ đề' : 'Đã tạo chủ đề mới');
+    }
+    async function deleteTopic(id) {
+      if(!confirm('Xóa chủ đề này? Từ vựng thuộc chủ đề vẫn được giữ.')) return;
+      state.topics = state.topics.filter(x => x.id !== id); saveLocal(); renderTopics(); renderTopicsDropdown();
+      if(!state.syncPending) syncToFirebase();
+      showToast('Đã xóa chủ đề');
+    }
+    function renderTopics() {
+      const grid = document.getElementById('topicsGrid');
+      if(state.topics.length === 0) { grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">Chưa có chủ đề nào. Hãy tạo chủ đề mới!</p>'; return; }
+      grid.innerHTML = state.topics.map(t => {
+        const count = state.vocabulary.filter(v => v.topicId === t.id).length;
+        return `<div class="card p-4 cursor-pointer" style="border-left: 4px solid ${t.color}"><div class="flex items-start justify-between"><div><span class="badge text-white" style="background:${t.color}">${t.name}</span><div class="text-xs text-gray-500 mt-2">${count} từ vựng</div></div><div class="flex gap-1"><button onclick="event.stopPropagation();openAddTopicModal('${t.id}')" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">✏️</button><button onclick="event.stopPropagation();deleteTopic('${t.id}')" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">🗑️</button></div></div></div>`;
+      }).join('');
+    }
+
+    // ===== VOCABULARY =====
+    function openAddVocabModal(id = null) {
+      renderTopicsDropdown(); document.getElementById('editVocabId').value = id || '';
+      document.getElementById('vocabModalTitle').textContent = id ? 'Sửa từ vựng' : 'Thêm từ vựng';
+      ['vocabWord','vocabIpa','vocabMeaning','vocabSynonym','vocabExample'].forEach(f => document.getElementById(f).value = '');
+      document.getElementById('vocabPos').value = ''; document.getElementById('vocabTopic').value = '';
+      if(id) { const v = state.vocabulary.find(x => x.id === id); if(v) { document.getElementById('vocabTopic').value = v.topicId; document.getElementById('vocabWord').value = v.word; document.getElementById('vocabIpa').value = v.ipa; document.getElementById('vocabPos').value = v.partOfSpeech; document.getElementById('vocabMeaning').value = v.vietnameseMeaning; document.getElementById('vocabSynonym').value = v.synonym; document.getElementById('vocabExample').value = v.example; } }
+      document.getElementById('vocabModal').classList.add('show');
+    }
+    async function saveVocabulary() {
+      const word = document.getElementById('vocabWord').value.trim(), meaning = document.getElementById('vocabMeaning').value.trim();
+      if(!word || !meaning) return showToast('Vui lòng nhập từ vựng và nghĩa', 'error');
+      const id = document.getElementById('editVocabId').value;
+      const data = { topicId: document.getElementById('vocabTopic').value, word, ipa: document.getElementById('vocabIpa').value.trim(), partOfSpeech: document.getElementById('vocabPos').value, vietnameseMeaning: meaning, synonym: document.getElementById('vocabSynonym').value.trim(), example: document.getElementById('vocabExample').value.trim() };
+      if(id) { const v = state.vocabulary.find(x => x.id === id); if(v) Object.assign(v, data); }
+      else { state.vocabulary.push({ id: Date.now().toString(), ...data, isStarred: false, createdAt: Date.now() }); }
+      saveLocal(); closeModal('vocabModal'); renderVocabulary(); updateDashboard();
+      if(!state.syncPending) syncToFirebase();
+      showToast(id ? 'Đã cập nhật từ vựng' : 'Đã thêm từ vựng mới');
+    }
+    async function deleteVocabulary(id) {
+      if(!confirm('Xóa từ vựng này?')) return;
+      state.vocabulary = state.vocabulary.filter(x => x.id !== id); state.learnedWords = state.learnedWords.filter(x => x !== id);
+      saveLocal(); renderVocabulary(); updateDashboard();
+      if(!state.syncPending) syncToFirebase();
+      showToast('Đã xóa từ vựng');
+    }
+    async function toggleStar(id) {
+      const v = state.vocabulary.find(x => x.id === id); if(v) v.isStarred = !v.isStarred;
+      saveLocal(); renderVocabulary();
+      if(!state.syncPending) syncToFirebase();
+    }
+    function renderVocabulary() {
+      let list = [...state.vocabulary];
+      const search = document.getElementById('searchInput')?.value.toLowerCase() || '', topicFilter = document.getElementById('filterTopic')?.value || '', posFilter = document.getElementById('filterPos')?.value || '';
+      if(search) list = list.filter(v => v.word.toLowerCase().includes(search) || v.vietnameseMeaning.toLowerCase().includes(search) || v.synonym?.toLowerCase().includes(search));
+      if(topicFilter) list = list.filter(v => v.topicId === topicFilter); if(posFilter) list = list.filter(v => v.partOfSpeech === posFilter);
+      list.sort((a, b) => { const sf = state.currentSort.field, d = state.currentSort.desc ? -1 : 1; if(sf === 'word') return a.word.localeCompare(b.word) * d; if(sf === 'index') return (a.createdAt - b.createdAt) * d; return 0; });
+      const totalPages = Math.ceil(list.length / state.pageSize); if(state.currentPage > totalPages) state.currentPage = Math.max(1, totalPages);
+      const start = (state.currentPage - 1) * state.pageSize, page = list.slice(start, start + state.pageSize);
+      const tbody = document.getElementById('vocabTableBody');
+      if(page.length === 0) { tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-gray-500">Không có từ vựng nào</td></tr>'; }
+      else {
+        tbody.innerHTML = page.map((v, i) => {
+          const topic = state.topics.find(t => t.id === v.topicId);
+          return `<tr><td><input type="checkbox" class="rounded"></td><td class="text-gray-500 text-sm">${start + i + 1}</td><td>${topic ? `<span class="badge text-white" style="background:${topic.color}">${topic.name}</span>` : '<span class="badge bg-gray-200 dark:bg-gray-700 text-gray-500">-</span>'}</td><td class="font-semibold">${v.word}</td><td class="text-gray-500 font-mono text-sm">${v.ipa || '-'}</td><td><span class="badge bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300">${v.partOfSpeech || '-'}</span></td><td>${v.vietnameseMeaning}</td><td class="hidden md:table-cell text-gray-500 text-sm">${v.synonym || '-'}</td><td class="hidden lg:table-cell text-gray-500 text-sm italic">"${v.example || '-'}"</td><td><button onclick="speakWord('${v.word}')" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">🔊</button></td><td><button onclick="toggleStar('${v.id}')" class="text-xl transition-transform ${v.isStarred ? 'star-active' : 'text-gray-300'}">${v.isStarred ? '⭐' : '☆'}</button></td><td><div class="flex gap-1"><button onclick="openAddVocabModal('${v.id}')" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">✏️</button><button onclick="deleteVocabulary('${v.id}')" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">🗑️</button></div></td></tr>`;
+        }).join('');
+      }
+      document.getElementById('paginationInfo').textContent = `Hiển thị ${list.length ? start+1 : 0}-${Math.min(start+state.pageSize, list.length)}/${list.length} từ`;
+    }
+    function sortVocab(field) { if(state.currentSort.field === field) state.currentSort.desc = !state.currentSort.desc; else { state.currentSort.field = field; state.currentSort.desc = false; } renderVocabulary(); }
+    function changePage(delta) { state.currentPage += delta; if(state.currentPage < 1) state.currentPage = 1; renderVocabulary(); }
+    let searchTimeout; function handleSearch(val) { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { state.currentPage = 1; renderVocabulary(); }, 300); }
+
+    // ===== STARRED =====
+    function renderStarred() {
+      const starred = state.vocabulary.filter(v => v.isStarred), container = document.getElementById('starredList');
+      if(starred.length === 0) { container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">Chưa có từ nào được đánh dấu ⭐</p>'; return; }
+      container.innerHTML = starred.map(v => {
+        const topic = state.topics.find(t => t.id === v.topicId);
+        return `<div class="card p-4"><div class="flex items-start justify-between mb-2"><span class="text-lg font-semibold">${v.word}</span><button onclick="toggleStar('${v.id}')" class="text-lg star-active">⭐</button></div><div class="text-sm text-gray-500 mb-1 font-mono">${v.ipa || ''}</div><div class="text-indigo-500 font-medium mb-1">${v.vietnameseMeaning}</div><div class="text-xs text-gray-400">${v.synonym || ''}</div>${v.example ? `<div class="text-xs text-gray-500 italic mt-1">"${v.example}"</div>` : ''}<div class="flex gap-2 mt-3"><button onclick="speakWord('${v.word}')" class="btn-outline text-xs px-3 py-1.5">🔊 Nghe</button>${topic ? `<span class="badge text-white" style="background:${topic.color}">${topic.name}</span>` : ''}</div></div>`;
+      }).join('');
+    }
+
+    // ===== FLASHCARDS =====
+    function initFlashcards() {
+      state.flashcards = state.vocabulary.filter(v => v.isStarred); state.currentFCIndex = 0;
+      if(state.flashcards.length === 0) { document.getElementById('noFlashcards').classList.remove('hidden'); document.getElementById('flashcardActive').classList.add('hidden'); }
+      else { document.getElementById('noFlashcards').classList.add('hidden'); document.getElementById('flashcardActive').classList.remove('hidden'); renderFlashcard(); }
+    }
+    function renderFlashcard() {
+      if(!state.flashcards.length) return;
+      const v = state.flashcards[state.currentFCIndex];
+      document.getElementById('fcWord').textContent = v.word; document.getElementById('fcIpa').textContent = v.ipa || '';
+      document.getElementById('fcMeaning').textContent = v.vietnameseMeaning; document.getElementById('fcExample').textContent = v.example || '';
+      document.getElementById('flipCard').classList.remove('flipped');
+      document.getElementById('fcProgress').textContent = `${state.currentFCIndex + 1}/${state.flashcards.length}`;
+      document.getElementById('fcProgressBar').style.width = `${((state.currentFCIndex + 1) / state.flashcards.length) * 100}%`;
+    }
+    function flipCard() { document.getElementById('flipCard').classList.toggle('flipped'); }
+    function navigateFlashcard(delta) { state.currentFCIndex += delta; if(state.currentFCIndex < 0) state.currentFCIndex = state.flashcards.length - 1; if(state.currentFCIndex >= state.flashcards.length) state.currentFCIndex = 0; renderFlashcard(); }
+    function shuffleFlashcards() { for(let i = state.flashcards.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [state.flashcards[i], state.flashcards[j]] = [state.flashcards[j], state.flashcards[i]]; } state.currentFCIndex = 0; renderFlashcard(); showToast('Đã trộn flashcard!'); }
+    function markLearned() { if(!state.flashcards.length) return; const v = state.flashcards[state.currentFCIndex]; if(!state.learnedWords.includes(v.id)) { state.learnedWords.push(v.id); saveLocal(); if(!state.syncPending) syncToFirebase(); } showToast('Đã đánh dấu thuộc ✅'); navigateFlashcard(1); }
+    function generateFlashcards() { initFlashcards(); showPage('flashcards'); }
+
+    // ===== QUIZ =====
+    function initQuiz() {
+      const starred = state.vocabulary.filter(v => v.isStarred);
+      document.getElementById('quizWordCount').textContent = `${starred.length} từ sẵn có`;
+      document.getElementById('quizStartBtn').disabled = starred.length < 4;
+      document.getElementById('quizSetup').classList.remove('hidden');
+      document.getElementById('quizActive').classList.add('hidden');
+      document.getElementById('quizResult').classList.add('hidden');
+    }
+    function startQuiz() {
+      const starred = state.vocabulary.filter(v => v.isStarred);
+      if(starred.length < 4) return showToast('Cần ít nhất 4 từ đã đánh dấu ⭐', 'error');
+      const count = Math.min(parseInt(document.getElementById('quizCount').value), starred.length);
+      const shuffled = [...starred].sort(() => Math.random() - 0.5).slice(0, count);
+      const type = document.querySelector('input[name="quizType"]:checked').value;
+      state.quizQuestions = []; state.currentQIndex = 0; state.quizScore = 0; state.quizSeconds = 0;
+      clearInterval(state.quizTimer);
+      shuffled.forEach(v => {
+        let q = { word: v.word, correct: '', options: [] };
+        const others = state.vocabulary.filter(x => x.id !== v.id).sort(() => Math.random() - 0.5).slice(0, 3);
+        if(type === 'meaning') { q.correct = v.vietnameseMeaning; q.question = `"${v.word}" có nghĩa là gì?`; q.options = [v.vietnameseMeaning, ...others.map(x => x.vietnameseMeaning)].sort(() => Math.random() - 0.5); }
+        else if(type === 'synonym' && v.synonym) { q.correct = v.synonym; q.question = `Đồng nghĩa của "${v.word}" là gì?`; q.options = [v.synonym, ...others.map(x => x.synonym || 'N/A')].sort(() => Math.random() - 0.5); }
+        else if(type === 'fillblank') { const sentence = v.example || `She is very ${v.word}.`; q.correct = v.word; q.question = sentence.replace(new RegExp(v.word, 'gi'), '_______'); q.options = [v.word, ...others.map(x => x.word)].sort(() => Math.random() - 0.5); }
+        else if(type === 'listening') { q.correct = v.word; q.question = `Nghe và chọn từ đúng:`; q.options = [v.word, ...others.map(x => x.word)].sort(() => Math.random() - 0.5); q.audio = true; }
+        state.quizQuestions.push(q);
+      });
+      document.getElementById('quizSetup').classList.add('hidden'); document.getElementById('quizActive').classList.remove('hidden');
+      state.quizTimer = setInterval(() => { state.quizSeconds++; const m = String(Math.floor(state.quizSeconds/60)).padStart(2,'0'), s = String(state.quizSeconds%60).padStart(2,'0'); document.getElementById('quizTimer').textContent = `⏱ ${m}:${s}`; }, 1000);
+      renderQuestion();
+    }
+    function renderQuestion() {
+      if(state.currentQIndex >= state.quizQuestions.length) return finishQuiz();
+      const q = state.quizQuestions[state.currentQIndex];
+      document.getElementById('quizCurrentQ').textContent = `Câu ${state.currentQIndex + 1}/${state.quizQuestions.length}`;
+      document.getElementById('quizProgressBar').style.width = `${((state.currentQIndex + 1) / state.quizQuestions.length) * 100}%`;
+      document.getElementById('quizQuestion').textContent = q.question;
+      if(q.audio) speakWord(q.correct);
+      const optContainer = document.getElementById('quizOptions');
+      optContainer.innerHTML = q.options.map(opt => `<button onclick="answerQuiz('${opt}')" class="w-full text-left p-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 transition-colors">${opt}</button>`).join('');
+      document.getElementById('quizFeedback').classList.add('hidden'); document.getElementById('nextQBtn').classList.add('hidden');
+    }
+    function answerQuiz(answer) {
+      const q = state.quizQuestions[state.currentQIndex], isCorrect = answer === q.correct;
+      if(isCorrect) state.quizScore++;
+      document.getElementById('quizOptions').innerHTML = q.options.map(opt => {
+        const cls = opt === q.correct ? 'border-green-500 bg-green-50 dark:bg-green-900' : opt === answer && !isCorrect ? 'border-red-500 bg-red-50 dark:bg-red-900' : 'border-gray-200 dark:border-gray-600';
+        return `<div class="w-full text-left p-3 rounded-xl border-2 ${cls} ${opt === q.correct ? 'font-semibold' : ''}">${opt} ${opt === q.correct ? '✅' : opt === answer && !isCorrect ? '❌' : ''}</div>`;
+      }).join('');
+      const fb = document.getElementById('quizFeedback'); fb.textContent = isCorrect ? '✅ Chính xác!' : `❌ Đáp án đúng: ${q.correct}`; fb.className = `mt-4 text-center font-semibold text-lg ${isCorrect ? 'text-green-500' : 'text-red-500'}`; fb.classList.remove('hidden'); document.getElementById('nextQBtn').classList.remove('hidden');
+    }
+    function nextQuestion() { state.currentQIndex++; renderQuestion(); }
+    function finishQuiz() {
+      clearInterval(state.quizTimer); document.getElementById('quizActive').classList.add('hidden'); document.getElementById('quizResult').classList.remove('hidden');
+      const total = state.quizQuestions.length, score = state.quizScore, pct = Math.round(score/total*100);
+      document.getElementById('resultScore').textContent = `${score}/${total}`;
+      document.getElementById('resultMsg').textContent = pct >= 80 ? '🌟 Xuất sắc!' : pct >= 60 ? '👍 Khá tốt!' : '💪 Hãy ôn lại nhé!';
+      document.getElementById('resultEmoji').textContent = pct >= 80 ? '🎉' : pct >= 60 ? '😊' : '📚';
+      state.quizHistory.push({ score: pct, completedAt: Date.now() }); saveLocal(); if(!state.syncPending) syncToFirebase();
+      if(pct >= 70) showConfetti();
+    }
+    function generateQuiz() { initQuiz(); showPage('quiz'); }
+
+    // ===== DASHBOARD =====
+    function updateDashboard() {
+      document.getElementById('totalWords').textContent = state.vocabulary.length;
+      document.getElementById('learnedWords').textContent = state.learnedWords.length;
+      document.getElementById('starredCount').textContent = state.vocabulary.filter(v => v.isStarred).length;
+      const avg = state.quizHistory.length ? Math.round(state.quizHistory.reduce((a, b) => a + b.score, 0) / state.quizHistory.length) : 0;
+      document.getElementById('avgScore').textContent = `${avg}%`;
+      const chart = document.getElementById('weeklyChart'), days = ['T2','T3','T4','T5','T6','T7','CN'], today = new Date();
+      let html = '';
+      for(let i = 6; i >= 0; i--) {
+        const d = new Date(today); d.setDate(d.getDate() - i); const key = d.toISOString().slice(0,10);
+        const count = state.vocabulary.filter(v => v.createdAt >= new Date(key).getTime()).length;
+        const h = Math.max(8, Math.min(count * 5, 140));
+        html += `<div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t-lg bg-gradient-to-t from-indigo-500 to-purple-400" style="height:${h}px"></div><span class="text-xs text-gray-500">${days[i]}</span></div>`;
+      }
+      chart.innerHTML = html;
+      let streak = 0, todayKey = today.toISOString().slice(0,10), hasToday = state.quizHistory.some(q => new Date(q.completedAt).toISOString().slice(0,10) === todayKey);
+      if(hasToday) { streak = 1; for(let i = 1; i < 365; i++) { const d = new Date(today); d.setDate(d.getDate() - i); const k = d.toISOString().slice(0,10); if(state.quizHistory.some(q => new Date(q.completedAt).toISOString().slice(0,10) === k)) streak++; else break; } }
+      document.getElementById('streakDays').textContent = streak;
+    }
+
+    // ===== PROGRESS =====
+    function updateProgress() {
+      const tp = document.getElementById('topicProgress');
+      tp.innerHTML = state.topics.map(t => {
+        const total = state.vocabulary.filter(v => v.topicId === t.id).length, learned = state.vocabulary.filter(v => v.topicId === t.id && state.learnedWords.includes(v.id)).length, pct = total ? Math.round(learned/total*100) : 0;
+        return `<div class="flex items-center gap-3"><span class="badge text-white min-w-[80px]" style="background:${t.color}">${t.name}</span><div class="flex-1"><div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%"></div></div></div><span class="text-sm text-gray-500 w-12 text-right">${pct}%</span></div>`;
+      }).join('') || '<p class="text-gray-500">Chưa có chủ đề</p>';
+      const qh = document.getElementById('quizHistory'), recent = state.quizHistory.slice(-10).reverse();
+      qh.innerHTML = recent.length ? recent.map(q => { const d = new Date(q.completedAt); return `<div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><span class="text-sm">${d.toLocaleDateString('vi-VN')} ${d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}</span><span class="font-semibold ${q.score>=70?'text-green-500':'text-orange-500'}">${q.score}%</span></div>`; }).join('') : '<p class="text-gray-500">Chưa có lịch sử quiz</p>';
+    }
+
+    // ===== SETTINGS =====
+    function exportData() {
+      const data = JSON.stringify({ vocabulary: state.vocabulary, topics: state.topics, quizHistory: state.quizHistory, learnedWords: state.learnedWords }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' }), url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `vocabmaster_${Date.now()}.json`; a.click();
+      URL.revokeObjectURL(url); showToast('Đã xuất dữ liệu!');
+    }
+    function importData(event) {
+      const file = event.target.files[0]; if(!file) return;
+      const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); state.vocabulary = data.vocabulary || []; state.topics = data.topics || []; state.quizHistory = data.quizHistory || []; state.learnedWords = data.learnedWords || []; saveLocal(); showToast('Đã nhập dữ liệu!'); showPage('dashboard'); if(!state.syncPending) syncToFirebase(); } catch { showToast('File không hợp lệ', 'error'); } };
+      reader.readAsText(file);
+    }
+    function clearAllData() {
+      if(!confirm('Xóa TẤT CẢ dữ liệu? Hành động này không thể hoàn tác.')) return;
+      state.vocabulary = []; state.topics = []; state.quizHistory = []; state.learnedWords = [];
+      saveLocal(); showToast('Đã xóa tất cả dữ liệu'); showPage('dashboard'); if(!state.syncPending) syncToFirebase();
+    }
+
+    // ===== DEMO DATA =====
+    function loadDemoData() {
+      state.topics = [
+        { id: 't1', name: 'IELTS Speaking', color: '#fbcfe8', createdAt: Date.now() },
+        { id: 't2', name: 'TOEIC Business', color: '#bfdbfe', createdAt: Date.now() },
+        { id: 't3', name: 'Education', color: '#bbf7d0', createdAt: Date.now() },
+        { id: 't4', name: 'Travel', color: '#fed7aa', createdAt: Date.now() }
+      ];
+      state.vocabulary = [
+        { id:'v1', topicId:'t1', word:'accommodate', ipa:'/əˈkɑːmədeɪt/', partOfSpeech:'Verb', vietnameseMeaning:'Đáp ứng, cung cấp chỗ ở', synonym:'provide, house', example:'The hotel can accommodate 200 guests.', isStarred: true, createdAt: Date.now() - 86400000 },
+        { id:'v2', topicId:'t1', word:'ambiguous', ipa:'/æmˈbɪɡjuəs/', partOfSpeech:'Adjective', vietnameseMeaning:'Mơ hồ, không rõ ràng', synonym:'vague, unclear', example:'His answer was ambiguous.', isStarred: false, createdAt: Date.now() - 172800000 },
+        { id:'v3', topicId:'t2', word:'negotiate', ipa:'/nɪˈɡoʊʃieɪt/', partOfSpeech:'Verb', vietnameseMeaning:'Đàm phán, thương lượng', synonym:'discuss, bargain', example:'We need to negotiate the terms.', isStarred: true, createdAt: Date.now() - 259200000 },
+        { id:'v4', topicId:'t2', word:'revenue', ipa:'/ˈrevənuː/', partOfSpeech:'Noun', vietnameseMeaning:'Doanh thu', synonym:'income, earnings', example:'The company revenue increased by 20%.', isStarred: false, createdAt: Date.now() - 345600000 },
+        { id:'v5', topicId:'t3', word:'curriculum', ipa:'/kəˈrɪkjələm/', partOfSpeech:'Noun', vietnameseMeaning:'Chương trình giảng dạy', synonym:'syllabus, program', example:'The school updated its curriculum.', isStarred: true, createdAt: Date.now() - 432000000 },
+        { id:'v6', topicId:'t3', word:'pedagogy', ipa:'/ˈpedəɡɑːdʒi/', partOfSpeech:'Noun', vietnameseMeaning:'Phương pháp giảng dạy', synonym:'teaching, education', example:'Modern pedagogy focuses on students.', isStarred: false, createdAt: Date.now() - 518400000 },
+        { id:'v7', topicId:'t4', word:'itinerary', ipa:'/aɪˈtɪnəreri/', partOfSpeech:'Noun', vietnameseMeaning:'Lịch trình du lịch', synonym:'schedule, plan', example:'Please check your travel itinerary.', isStarred: true, createdAt: Date.now() - 604800000 },
+        { id:'v8', topicId:'t4', word:'excursion', ipa:'/ɪkˈskɜːrʒn/', partOfSpeech:'Noun', vietnameseMeaning:'Chuyến tham quan ngắn', synonym:'trip, tour', example:'We went on an excursion to the island.', isStarred: false, createdAt: Date.now() - 691200000 },
+        { id:'v9', topicId:'t1', word:'comprehensive', ipa:'/ˌkɑːmprɪˈhensɪv/', partOfSpeech:'Adjective', vietnameseMeaning:'Toàn diện, đầy đủ', synonym:'thorough, complete', example:'We need a comprehensive plan.', isStarred: true, createdAt: Date.now() - 777600000 },
+        { id:'v10', topicId:'t2', word:'deadline', ipa:'/ˈdedlaɪn/', partOfSpeech:'Noun', vietnameseMeaning:'Hạn chót', synonym:'time limit', example:'The deadline is next Friday.', isStarred: false, createdAt: Date.now() - 864000000 }
+      ];
+      state.learnedWords = ['v5', 'v9'];
+      state.quizHistory = [ { score: 80, completedAt: Date.now() - 86400000 }, { score: 100, completedAt: Date.now() - 172800000 }, { score: 60, completedAt: Date.now() - 259200000 } ];
+      saveLocal(); showToast('Đã tải dữ liệu demo!'); showPage('dashboard'); if(!state.syncPending) syncToFirebase();
+    }
+
+    // ===== INIT =====
+    function init() {
+      loadLocal();
+      if(state.settings.darkMode) toggleTheme();
+      showPage('dashboard');
+      // Firebase status & listener
+      db.ref('.info/connected').on('value', (snap) => {
+        if(snap.val() === true) { updateStatus('Online ✓', 'green'); listenToChanges(); }
+        else { updateStatus('Offline', 'red'); }
+      });
+      // Notification
+      if(state.settings.dailyReminder && 'Notification' in window) {
+        Notification.requestPermission().then(p => { if(p === 'granted') setTimeout(() => new Notification('VocabMaster Pro', { body: '📚 Đừng quên học từ vựng hôm nay!' }), 5000); });
+      }
+    }
+    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape') { document.querySelectorAll('.modal-overlay').forEach(m => closeModal(m.id)); if(!sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) closeSidebar(); }
+      if(e.key === 'ArrowRight' && document.getElementById('flashcards').classList.contains('active')) navigateFlashcard(1);
+      if(e.key === 'ArrowLeft' && document.getElementById('flashcards').classList.contains('active')) navigateFlashcard(-1);
+      if(e.key === ' ') { const fc = document.getElementById('flashcards'); if(fc.classList.contains('active')) { e.preventDefault(); flipCard(); } }
+    });
+  </script>
 </body>
 </html>
