@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VocabMaster Pro - IELTS • TOEIC • School Vocabulary</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dark: { bg: '#0f172a', card: '#1e293b', border: '#334155', text: '#e2e8f0', muted: '#94a3b8' }
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          animation: {
+            'blob': 'blob 7s infinite', 'fade-in': 'fadeIn 0.4s ease-out', 'slide-up': 'slideUp 0.3s ease-out',
+            'confetti': 'confetti 1s ease-out forwards', 'pulse-soft': 'pulseSoft 2s infinite'
+          },
+          keyframes: {
+            blob: { '0%,100%':{transform:'translate(0,0) scale(1)'},'25%':{transform:'translate(50px,-50px) scale(1.2)'},'50%':{transform:'translate(-20px,40px) scale(0.9)'} },
+            fadeIn: { '0%':{opacity:0},'100%':{opacity:1} }, slideUp: { '0%':{opacity:0,transform:'translateY(10px)'},'100%':{opacity:1,transform:'translateY(0)'} },
+            confetti: { '0%':{opacity:1,transform:'translate(0,0) scale(0)'},'100%':{opacity:0,transform:'translate(var(--x),var(--y)) scale(1)'} },
+            pulseSoft: { '0%,100%':{opacity:0.6},'50%':{opacity:1} }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05); }
+    .dark { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --muted: #94a3b8; --border: #334155; --shadow: 0 4px 6px -1px rgba(0,0,0,0.3); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4); }
+    * { box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; overflow-x: hidden; min-height: 100vh; }
+    .glass { background: rgba(255,255,255,0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); }
+    .dark .glass { background: rgba(30,41,59,0.75); border: 1px solid rgba(51,65,85,0.6); }
+    .card { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: all 0.25s; }
+    .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .input { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 0.7rem 1rem; color: var(--text); transition: 0.2s; outline: none; width: 100%; }
+    .input:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,0.2); }
+    .btn { background: linear-gradient(135deg, #818cf8, #a78bfa); color: white; border: none; border-radius: 12px; padding: 0.7rem 1.2rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(129,140,248,0.35); }
+    .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: #818cf8; color: #818cf8; background: rgba(129,140,248,0.05); }
+    .badge { border-radius: 999px; padding: 0.2rem 0.6rem; font-size: 0.7rem; font-weight: 600; white-space: nowrap; }
+    .blob { position: fixed; border-radius: 50%; filter: blur(70px); opacity: 0.35; z-index: -1; pointer-events: none; }
+    .scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+    .flip-card { perspective: 1000px; }
+    .flip-inner { transition: transform 0.6s; transform-style: preserve-3d; position: relative; width: 100%; height: 100%; }
+    .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+    .flip-front, .flip-back { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+    .flip-back { transform: rotateY(180deg); }
+    .star-active { color: #fbbf24 !important; transform: scale(1.15); transition: 0.2s; }
+    .page { display: none; }
+    .page.active { display: block; animation: slideUp 0.3s ease-out; }
+    .progress-bar { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #818cf8, #a78bfa); border-radius: 999px; transition: width 0.4s; }
+    .confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden; }
+    .confetti-piece { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: confetti 1s ease-out forwards; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; opacity: 0; pointer-events: none; transition: 0.2s; }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal-content { background: var(--card); border-radius: 20px; padding: 1.5rem; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: 0.2s; }
+    .modal-overlay.show .modal-content { transform: scale(1); }
+    .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 100; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+    .toast { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 0.8rem 1rem; box-shadow: var(--shadow-lg); animation: slideUp 0.2s ease-out; pointer-events: auto; border-left: 4px solid #10b981; }
+    .toast.error { border-left-color: #ef4444; }
+
+    /* SIDEBAR SYSTEM */
+    #sidebarOverlay { transition: opacity 0.25s; }
+    #sidebar { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), width 0.3s cubic-bezier(0.4,0,0.2,1), padding 0.3s; }
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    body.sidebar-open { overflow: hidden; }
+    @media (min-width: 768px) {
+      #sidebar { transform: translateX(0); width: 16rem; padding-left: 1rem; padding-right: 1rem; }
+      main { margin-left: 16rem; transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1); }
+    }
+    html.sidebar-collapsed #sidebar { width: 5rem !important; padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    html.sidebar-collapsed main { margin-left: 5rem; }
+    html.sidebar-collapsed .sidebar-text { opacity: 0; width: 0; pointer-events: none; transition: opacity 0.15s; }
+    html.sidebar-collapsed .nav-item-desktop { justify-content: center; padding: 0.75rem; }
+    html.sidebar-collapsed #collapseBtn { transform: rotate(180deg); }
+    @media (min-width: 768px) {
+      html.sidebar-collapsed #sidebar:hover { width: 16rem !important; box-shadow: var(--shadow-lg); padding-left: 1rem; padding-right: 1rem; }
+      html.sidebar-collapsed #sidebar:hover .sidebar-text { opacity: 1; width: auto; pointer-events: auto; transition-delay: 0.1s; }
+      html.sidebar-collapsed #sidebar:hover .nav-item-desktop { justify-content: flex-start; padding: 0.625rem 0.75rem; }
+      html.sidebar-collapsed #sidebar:hover #collapseBtn { transform: rotate(0deg); right: -15px; }
+    }
+    .nav-item-desktop.active { background: linear-gradient(135deg, rgba(129,140,248,0.15), rgba(167,139,250,0.1)); color: #818cf8; }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1" style="width:300px;height:300px;top:-100px;left:-50px;background:#fbcfe8;"></div>
+  <div class="blob blob-2" style="width:400px;height:400px;bottom:-150px;right:-100px;background:#bfdbfe;"></div>
+  <div class="blob blob-3" style="width:250px;height:250px;top:40%;right:20%;background:#e9d5ff;"></div>
+  <div class="confetti-container" id="confetti"></div>
+  <div class="toast-container" id="toasts"></div>
+
+  <!-- Overlay Mobile -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 opacity-0 pointer-events-none md:hidden"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 glass flex flex-col overflow-hidden">
+    <button id="closeSidebarBtn" class="md:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">✕</button>
+    <div class="flex items-center gap-3 px-2 mb-6 mt-2 md:mt-4">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">V</div>
+      <span class="sidebar-text font-bold text-xl bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent whitespace-nowrap">VocabMaster</span>
+    </div>
+    <nav class="flex-1 space-y-1 px-1 scrollbar">
+      <button onclick="showPage('dashboard')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span class="sidebar-text whitespace-nowrap">Dashboard</span>
+      </button>
+      <button onclick="showPage('vocabulary')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg><span class="sidebar-text whitespace-nowrap">Từ vựng</span>
+      </button>
+      <button onclick="showPage('topics')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/></svg><span class="sidebar-text whitespace-nowrap">Chủ đề</span>
+      </button>
+      <button onclick="showPage('starred')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><span class="sidebar-text whitespace-nowrap">Đã đánh dấu</span>
+      </button>
+      <button onclick="showPage('flashcards')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg><span class="sidebar-text whitespace-nowrap">Flashcard</span>
+      </button>
+      <button onclick="showPage('quiz')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="sidebar-text whitespace-nowrap">Quiz</span>
+      </button>
+      <button onclick="showPage('progress')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span class="sidebar-text whitespace-nowrap">Tiến trình</span>
+      </button>
+    </nav>
+    <div class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2 px-1 pb-4">
+      <button onclick="showPage('settings')" class="nav-item-desktop w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="sidebar-text whitespace-nowrap">Cài đặt</span>
+      </button>
+      <button id="themeToggleDesktop" onclick="toggleTheme()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
+        <span id="themeIconDesktop">🌙</span><span class="sidebar-text whitespace-nowrap">Chế độ tối</span>
+      </button>
+    </div>
+    <button id="collapseBtn" class="hidden md:flex absolute -right-3 top-24 w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full items-center justify-center shadow-md z-50 transition-transform hover:scale-110" aria-label="Thu nhỏ sidebar">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+  </aside>
+
+  <main class="pb-20 md:pb-8 min-h-screen">
+    <header class="sticky top-0 z-30 p-3 md:px-6">
+      <div class="glass rounded-2xl p-2.5 flex items-center gap-3">
+        <button id="hamburgerBtn" class="md:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div class="flex-1 relative">
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Tìm kiếm từ vựng..." class="input pr-10 py-2 bg-gray-50 dark:bg-gray-800 border-0">
+          <svg class="w-5 h-5 absolute right-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <button onclick="showToast('🔔 Hãy học 5 từ vựng hôm nay!')" class="relative p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="p-3 md:p-6 max-w-7xl mx-auto space-y-5">
+      <!-- DASHBOARD -->
+      <div id="dashboard" class="page active">
+        <h1 class="text-2xl md:text-3xl font-bold mb-5">📊 Dashboard</h1>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div class="card p-5"><div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Tổng từ vựng</div><div class="text-2xl font-bold" id="totalWords">0</div></div>
+          <div class="card p-5"><div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Đã thuộc</div><div class="text-2xl font-bold text-green-500" id="learnedWords">0</div></div>
+          <div class="card p-5"><div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Đánh dấu ⭐</div><div class="text-2xl font-bold text-yellow-500" id="starredCount">0</div></div>
+          <div class="card p-5"><div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Điểm trung bình</div><div class="text-2xl font-bold text-indigo-500" id="avgScore">0%</div></div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="card p-6"><h3 class="font-semibold mb-4">📈 Progress 7 ngày qua</h3><div class="flex items-end gap-2 h-40" id="weeklyChart"></div></div>
+          <div class="card p-6"><h3 class="font-semibold mb-4">🎯 Học tập liên tiếp</h3><div class="text-center py-6"><div class="text-5xl font-bold text-orange-500" id="streakDays">0</div><div class="text-gray-500 mt-2">ngày liên tiếp</div></div></div>
+        </div>
+      </div>
+
+      <!-- VOCABULARY -->
+      <div id="vocabulary" class="page">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <h1 class="text-2xl md:text-3xl font-bold">📚 Từ vựng</h1>
+          <div class="flex gap-2 flex-wrap">
+            <select id="filterTopic" onchange="state.currentPage=1;renderVocabulary()" class="input w-auto bg-gray-50 dark:bg-gray-800"><option value="">Tất cả chủ đề</option></select>
+            <select id="filterPos" onchange="state.currentPage=1;renderVocabulary()" class="input w-auto bg-gray-50 dark:bg-gray-800"><option value="">Tất cả từ loại</option><option value="Noun">Noun</option><option value="Verb">Verb</option><option value="Adjective">Adjective</option><option value="Adverb">Adverb</option></select>
+            <button onclick="openVocabModal()" class="btn"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg><span class="hidden sm:inline">Thêm</span></button>
+          </div>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="overflow-x-auto scrollbar">
+            <table class="w-full border-collapse">
+              <thead><tr><th class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 font-semibold text-left text-sm">STT</th><th class="p-3 border-b bg-gray-50 dark:bg-gray-800 font-semibold text-left text-sm">Chủ đề</th><th class="p-3 border-b bg-gray-50 dark:bg-gray-800 font-semibold text-left text-sm">Từ vựng</th><th class="p-3 border-b bg-gray-50 dark:bg-gray-800 font-semibold text-left text-sm hidden md:table-cell">IPA</th><th class="p-3 border-b bg-gray-50 dark:bg-gray-800 font-semibold text-left text-sm">Loại</th><th class="p-3 border-b bg-gray-50 dark:bg-gray-800 font-semibold text-left text-sm">Nghĩa</th><th class="p-3 border-b bg-gray-50 dark:bg-gray-800 font-semibold text-left text-sm hidden lg:table-cell">Ví dụ</th><th class="p-3 border-b bg-gray-50 dark:bg-gray-800 font-semibold text-center text-sm">🔊</th><th class="p-3 border-b bg-gray-50 dark:bg-gray-800 font-semibold text-center text-sm">⭐</th><th class="p-3 border-b bg-gray-50 dark:bg-gray-800 font-semibold text-center text-sm">Hành động</th></tr></thead>
+              <tbody id="vocabTableBody"></tbody>
+            </table>
+          </div>
+          <div class="p-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
+            <span class="text-sm text-gray-500" id="paginationInfo">0 từ</span>
+            <div class="flex gap-2"><button onclick="changePage(-1)" class="btn-outline px-3 py-1.5 rounded-lg text-sm">←</button><button onclick="changePage(1)" class="btn-outline px-3 py-1.5 rounded-lg text-sm">→</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPICS -->
+      <div id="topics" class="page">
+        <div class="flex items-center justify-between mb-5"><h1 class="text-2xl md:text-3xl font-bold">🏷️ Chủ đề</h1><button onclick="openTopicModal()" class="btn"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Tạo mới</button></div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="topicsGrid"></div>
+      </div>
+
+      <!-- STARRED -->
+      <div id="starred" class="page">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5"><h1 class="text-2xl md:text-3xl font-bold">⭐ Đã đánh dấu</h1><div class="flex gap-2"><button onclick="generateQuiz()" class="btn">📝 Tạo Quiz</button><button onclick="initFlashcards();showPage('flashcards')" class="btn-outline">🃏 Flashcard</button></div></div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="starredList"></div>
+      </div>
+
+      <!-- FLASHCARDS -->
+      <div id="flashcards" class="page">
+        <h1 class="text-2xl md:text-3xl font-bold mb-5">🃏 Flashcard</h1>
+        <div id="noFlashcards" class="text-center py-10"><div class="text-6xl mb-4">🃏</div><p class="text-gray-500">Chưa có từ nào. Đánh dấu ⭐ từ vựng để tạo flashcard.</p></div>
+        <div id="flashcardActive" class="hidden max-w-lg mx-auto">
+          <div class="mb-4 text-center"><span id="fcProgress" class="text-sm text-gray-500"></span><div class="progress-bar mt-2 max-w-xs mx-auto"><div class="progress-fill" id="fcProgressBar"></div></div></div>
+          <div class="flip-card h-72 cursor-pointer mb-6" id="flipCard" onclick="flipCard()"><div class="flip-inner" id="fcInner"><div class="flip-front glass card p-6"><div id="fcWord" class="text-3xl font-bold mb-2"></div><div id="fcIpa" class="text-lg text-gray-500 mb-4"></div><button onclick="event.stopPropagation();speakWord(document.getElementById('fcWord').textContent)" class="btn-outline p-3 rounded-full">🔊</button></div><div class="flip-back glass card p-6"><div id="fcMeaning" class="text-2xl font-semibold mb-3 text-indigo-500 text-center"></div><div id="fcExample" class="text-gray-500 text-center italic px-4"></div></div></div></div>
+          <div class="flex justify-center gap-3 flex-wrap">
+            <button onclick="navigateFC(-1)" class="btn-outline p-3 rounded-xl">⬅ Trước</button><button onclick="shuffleFC()" class="btn-outline p-3 rounded-xl">🔀 Trộn</button><button onclick="markLearned()" class="btn p-3 rounded-xl">✓ Thuộc</button><button onclick="navigateFC(1)" class="btn-outline p-3 rounded-xl">Tiếp ➡</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div id="quiz" class="page">
+        <h1 class="text-2xl md:text-3xl font-bold mb-5">📝 Quiz</h1>
+        <div id="quizSetup" class="card p-6 max-w-lg mx-auto"><h3 class="font-semibold mb-3">Tạo Quiz từ từ ⭐</h3><p class="text-gray-500 mb-4" id="quizWordCount">0 từ sẵn có</p>
+          <div class="space-y-3 mb-4"><label class="flex items-center gap-3 cursor-pointer"><input type="radio" name="qtype" value="meaning" checked><span>Chọn nghĩa</span></label><label class="flex items-center gap-3 cursor-pointer"><input type="radio" name="qtype" value="synonym"><span>Đồng nghĩa</span></label><label class="flex items-center gap-3 cursor-pointer"><input type="radio" name="qtype" value="fillblank"><span>Điền từ</span></label><label class="flex items-center gap-3 cursor-pointer"><input type="radio" name="qtype" value="listening"><span>Nghe chọn</span></label></div>
+          <div class="flex gap-3 items-center mb-4"><span class="text-sm">Số câu:</span><select id="quizCount" class="input w-20 py-1 bg-gray-50 dark:bg-gray-800 border-0"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option></select></div>
+          <button onclick="startQuiz()" class="btn w-full" id="quizStartBtn" disabled>Bắt đầu</button>
+        </div>
+        <div id="quizActive" class="hidden max-w-2xl mx-auto"><div class="flex justify-between mb-3 font-medium"><span id="quizCurrentQ">Câu 1</span><span id="quizTimer">⏱ 00:00</span></div><div class="progress-bar mb-4"><div class="progress-fill" id="quizProgressBar"></div></div><div class="card p-6"><div id="quizQuestion" class="text-xl font-semibold mb-5 text-center"></div><div id="quizOptions" class="grid gap-2"></div></div><div id="quizFeedback" class="hidden mt-4 text-center font-semibold text-lg"></div><div class="flex justify-center mt-4"><button onclick="nextQ()" class="btn hidden" id="nextQBtn">Tiếp ➡</button></div></div>
+        <div id="quizResult" class="hidden max-w-lg mx-auto text-center card p-8"><div class="text-6xl mb-4" id="resultEmoji">🎉</div><h2 class="text-2xl font-bold mb-2">Hoàn thành!</h2><div class="text-5xl font-bold text-indigo-500 mb-4" id="resultScore">0/0</div><p class="text-gray-500 mb-6" id="resultMsg">Xuất sắc!</p><div class="flex gap-3 justify-center"><button onclick="showPage('vocabulary')" class="btn-outline">Ôn từ sai</button><button onclick="startQuiz()" class="btn">Làm lại</button></div></div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div id="progress" class="page"><h1 class="text-2xl md:text-3xl font-bold mb-5">📈 Tiến trình</h1><div class="grid md:grid-cols-2 gap-6"><div class="card p-6"><h3 class="font-semibold mb-4">Hoàn thành theo chủ đề</h3><div id="topicProgress" class="space-y-3"></div></div><div class="card p-6"><h3 class="font-semibold mb-4">Lịch sử Quiz</h3><div id="quizHistory" class="space-y-3"></div></div></div></div>
+
+      <!-- SETTINGS -->
+      <div id="settings" class="page"><h1 class="text-2xl md:text-3xl font-bold mb-5">⚙️ Cài đặt</h1><div class="max-w-lg space-y-4">
+        <div class="card p-6"><div class="flex items-center justify-between"><span>Chế độ tối</span><button onclick="toggleTheme()" class="btn-outline px-4 py-1.5 rounded-lg text-sm" id="themeToggleBtn">Bật</button></div></div>
+        <div class="card p-6"><h3 class="font-semibold mb-3">Dữ liệu</h3><div class="flex gap-2 flex-wrap"><button onclick="exportData()" class="btn-outline px-3 py-2 rounded-lg text-sm">📤 Xuất JSON</button><label class="btn-outline px-3 py-2 rounded-lg text-sm cursor-pointer">📥 Nhập<input type="file" accept=".json" onchange="importData(event)" class="hidden"></label><button onclick="loadDemo()" class="btn-outline px-3 py-2 rounded-lg text-sm">📦 Demo</button><button onclick="clearAll()" class="btn btn-danger px-3 py-2 rounded-lg text-sm">🗑️ Xóa</button></div></div>
+      </div></div>
+    </div>
+  </main>
+
+  <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-30 md:hidden">
+    <div class="flex justify-around items-center max-w-md mx-auto py-2">
+      <button onclick="showPage('dashboard')" class="flex flex-col items-center gap-1 p-2 text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span class="text-xs">Home</span></button>
+      <button onclick="showPage('vocabulary')" class="flex flex-col items-center gap-1 p-2 text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg><span class="text-xs">Từ vựng</span></button>
+      <button onclick="showPage('flashcards')" class="flex flex-col items-center gap-1 p-2 text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg><span class="text-xs">Flashcard</span></button>
+      <button onclick="showPage('quiz')" class="flex flex-col items-center gap-1 p-2 text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-xs">Quiz</span></button>
+      <button onclick="showPage('settings')" class="flex flex-col items-center gap-1 p-2 text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-xs">Cài đặt</span></button>
+    </div>
+  </nav>
+
+  <!-- MODALS -->
+  <div id="vocabModal" class="modal-overlay" onclick="if(event.target===this)closeModal('vocabModal')"><div class="modal-content"><h2 class="text-xl font-bold mb-4" id="vocabTitle">Thêm từ vựng</h2><input type="hidden" id="editVocabId"><div class="space-y-3">
+    <select id="vTopic" class="input bg-gray-50 dark:bg-gray-800"><option value="">Chọn chủ đề</option></select>
+    <input type="text" id="vWord" placeholder="Từ vựng *" class="input bg-gray-50 dark:bg-gray-800"><input type="text" id="vIpa" placeholder="IPA /fəˈnetɪk/" class="input bg-gray-50 dark:bg-gray-800">
+    <select id="vPos" class="input bg-gray-50 dark:bg-gray-800"><option value="">Từ loại</option><option value="Noun">Noun</option><option value="Verb">Verb</option><option value="Adjective">Adjective</option><option value="Adverb">Adverb</option></select>
+    <input type="text" id="vMean" placeholder="Nghĩa tiếng Việt *" class="input bg-gray-50 dark:bg-gray-800"><input type="text" id="vSyn" placeholder="Đồng nghĩa" class="input bg-gray-50 dark:bg-gray-800"><textarea id="vEx" placeholder="Ví dụ" class="input bg-gray-50 dark:bg-gray-800" rows="2"></textarea>
+    <div class="flex gap-2 pt-2"><button onclick="saveVocab()" class="btn flex-1">💾 Lưu</button><button onclick="closeModal('vocabModal')" class="btn-outline flex-1">Hủy</button></div></div></div></div>
+
+  <div id="topicModal" class="modal-overlay" onclick="if(event.target===this)closeModal('topicModal')"><div class="modal-content"><h2 class="text-xl font-bold mb-4" id="topicTitle">Tạo chủ đề</h2><input type="hidden" id="editTopicId"><div class="space-y-3">
+    <input type="text" id="tName" placeholder="Tên chủ đề *" class="input bg-gray-50 dark:bg-gray-800">
+    <div><div class="text-sm font-medium mb-2">Chọn màu</div><div class="grid grid-cols-5 gap-2 mb-2">
+      <button onclick="pickColor('#fbcfe8')" class="w-10 h-10 rounded-lg bg-[#fbcfe8] hover:scale-110 transition"></button>
+      <button onclick="pickColor('#bfdbfe')" class="w-10 h-10 rounded-lg bg-[#bfdbfe] hover:scale-110 transition"></button>
+      <button onclick="pickColor('#e9d5ff')" class="w-10 h-10 rounded-lg bg-[#e9d5ff] hover:scale-110 transition"></button>
+      <button onclick="pickColor('#bbf7d0')" class="w-10 h-10 rounded-lg bg-[#bbf7d0] hover:scale-110 transition"></button>
+      <button onclick="pickColor('#fef08a')" class="w-10 h-10 rounded-lg bg-[#fef08a] hover:scale-110 transition"></button>
+      <button onclick="pickColor('#fed7aa')" class="w-10 h-10 rounded-lg bg-[#fed7aa] hover:scale-110 transition"></button>
+      <button onclick="pickColor('#a7f3d0')" class="w-10 h-10 rounded-lg bg-[#a7f3d0] hover:scale-110 transition"></button>
+      <button onclick="pickColor('#ddd6fe')" class="w-10 h-10 rounded-lg bg-[#ddd6fe] hover:scale-110 transition"></button>
+    </div><div class="flex gap-2"><input type="color" id="tColor" onchange="pickColor(this.value)" class="w-10 h-10 rounded-lg"><input type="text" id="tHex" placeholder="#hex" oninput="pickColor(this.value)" class="input flex-1 bg-gray-50 dark:bg-gray-800"></div></div>
+    <div class="flex gap-2 pt-2"><button onclick="saveTopic()" class="btn flex-1">💾 Lưu</button><button onclick="closeModal('topicModal')" class="btn-outline flex-1">Hủy</button></div></div></div></div>
+
+  <script>
+    // ===== STATE =====
+    let state = { vocab:[], topics:[], history:[], learned:[], settings:{dark:false}, page:1, size:20, sort:{f:'createdAt',d:true}, fc:[], fcIdx:0, q:[], qIdx:0, qScore:0, qTime:0, qTimer:null };
+    const ls = key => localStorage.getItem(key);
+    const save = () => localStorage.setItem('vocabMaster', JSON.stringify(state));
+    const load = () => { const d=ls('vocabMaster'); if(d){const p=JSON.parse(d); Object.assign(state,p); state.settings={...state.settings, ...p.settings}; } };
+    load();
+
+    // ===== UI =====
+    const $(s)=>document.querySelector(s), $$(s)=>document.querySelectorAll(s);
+    const showPage = id => { $$('.page').forEach(p=>p.classList.remove('active')); $(`#${id}`)?.classList.add('active'); $$('main .nav-item-desktop').forEach(n=>n.classList.toggle('active',n.getAttribute('onclick')?.includes(id))); window.scrollTo({top:0,behavior:'smooth'}); if(id==='dashboard') updDash(); if(id==='vocabulary'){fillTopics(); renderVocab();} if(id==='topics') renderTopics(); if(id==='starred') renderStarred(); if(id==='flashcards') initFC(); if(id==='quiz') initQuiz(); if(id==='progress') updProg(); closeSidebar(); };
+    const toggleTheme = () => { state.settings.dark=!state.settings.dark; document.documentElement.classList.toggle('dark',state.settings.dark); $('#themeIconDesktop').textContent=state.settings.dark?'☀️':'🌙'; $('#themeToggleBtn').textContent=state.settings.dark?'Tắt':'Bật'; save(); showToast(state.settings.dark?'Bật chế độ tối':'Bật chế độ sáng'); };
+    const showToast = (m,t='s') => { const c=$('#toasts'),e=document.createElement('div'); e.className=`toast ${t==='e'?'error':''}`; e.textContent=m; c.appendChild(e); setTimeout(()=>e.remove(),3000); };
+    const showConfetti = () => { const c=$('#confetti');c.innerHTML=''; for(let i=0;i<40;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.background=['#fbcfe8','#bfdbfe','#e9d5ff','#bbf7d0','#fef08a','#818cf8'][i%6];p.style.left=`${Math.random()*100}%`;p.style.top=`${Math.random()*20}%`;p.style.setProperty('--x',`${(Math.random()*200-100)}px`);p.style.setProperty('--y',`${Math.random()*300+100}px`);c.appendChild(p);}setTimeout(()=>c.innerHTML='',1500); };
+    const speakWord = w => { window.speechSynthesis?.cancel(); const u=new SpeechSynthesisUtterance(w); u.lang='en-US'; u.rate=0.9; window.speechSynthesis?.speak(u); };
+    const pickColor = c => { $('#tColor').value=c; $('#tHex').value=c; };
+
+    // ===== SIDEBAR =====
+    const sidebar=$('#sidebar'), overlay=$('#sidebarOverlay'), hamburger=$('#hamburgerBtn'), closeBtn=$('#closeSidebarBtn'), collapseBtn=$('#collapseBtn');
+    const openSidebar = () => { sidebar.classList.add('open'); overlay.classList.remove('pointer-events-none','opacity-0'); document.body.classList.add('sidebar-open'); };
+    const closeSidebar = () => { sidebar.classList.remove('open'); overlay.classList.add('pointer-events-none','opacity-0'); document.body.classList.remove('sidebar-open'); };
+    const toggleCollapse = () => { if(window.innerWidth<768) return; document.documentElement.classList.toggle('sidebar-collapsed'); save(); };
+    hamburger?.addEventListener('click', openSidebar); closeBtn?.addEventListener('click', closeSidebar); overlay?.addEventListener('click', closeSidebar); collapseBtn?.addEventListener('click', toggleCollapse);
+    $$('main .nav-item-desktop, nav button').forEach(b=>b.addEventListener('click',()=>{if(window.innerWidth<768)closeSidebar();}));
+    if(ls('sidebarCollapsed')==='true' && window.innerWidth>=768) document.documentElement.classList.add('sidebar-collapsed');
+
+    // ===== TOPICS =====
+    const fillTopics = () => { const opts = '<option value="">Tất cả chủ đề</option>'+state.topics.map(t=>`<option value="${t.id}">${t.name}</option>`).join(''); const s1=$('#filterTopic'),s2=$('#vTopic'); if(s1)s1.innerHTML=opts; if(s2)s2.innerHTML=opts; };
+    const openTopicModal = id => { $('#editTopicId').value=id||''; $('#tName').value=''; $('#topicTitle').textContent=id?'Sửa chủ đề':'Tạo chủ đề'; $('#tColor').value='#fbcfe8'; $('#tHex').value='#fbcfe8'; $('#topicModal').classList.add('show'); if(id){const t=state.topics.find(x=>x.id===id);if(t){$('#tName').value=t.name;pickColor(t.color);}} };
+    const saveTopic = () => { const n=$('#tName').value.trim(),c=$('#tHex').value||'#fbcfe8'; if(!n)return showToast('Nhập tên chủ đề','e'); const id=$('#editTopicId').value; if(id){const t=state.topics.find(x=>x.id===id);if(t){t.name=n;t.color=c;}}else{state.topics.push({id:Date.now().toString(),name:n,color:c,createdAt:Date.now()});} save(); closeModal('topicModal'); renderTopics(); showToast('Đã lưu chủ đề'); };
+    const delTopic = id => { if(!confirm('Xóa chủ đề?'))return; state.topics=state.topics.filter(x=>x.id!==id); save(); renderTopics(); showToast('Đã xóa'); };
+    const renderTopics = () => { const g=$('#topicsGrid'); if(!state.topics.length)return g.innerHTML='<p class="col-span-full text-center py-8 text-gray-500">Chưa có chủ đề</p>'; g.innerHTML=state.topics.map(t=>{const cnt=state.vocab.filter(v=>v.topicId===t.id).length;return `<div class="card p-4 border-l-4" style="border-left-color:${t.color}"><div class="flex justify-between"><span class="badge text-white" style="background:${t.color}">${t.name}</span><div class="flex gap-1"><button onclick="openTopicModal('${t.id}')" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">✏️</button><button onclick="delTopic('${t.id}')" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">🗑️</button></div></div><div class="text-xs text-gray-500 mt-2">${cnt} từ</div></div>`;}).join(''); };
+
+    // ===== VOCABULARY =====
+    const openVocabModal = id => { fillTopics(); $('#editVocabId').value=id||''; $('#vocabTitle').textContent=id?'Sửa từ':'Thêm từ'; ['vWord','vIpa','vMean','vSyn','vEx'].forEach(x=>$(`#${x}`).value=''); $('#vPos').value='';$('#vTopic').value=''; if(id){const v=state.vocab.find(x=>x.id===id);if(v){$('#vTopic').value=v.topicId;$('#vWord').value=v.word;$('#vIpa').value=v.ipa;$('#vPos').value=v.partOfSpeech;$('#vMean').value=v.vietnameseMeaning;$('#vSyn').value=v.synonym;$('#vEx').value=v.example;}} $('#vocabModal').classList.add('show'); };
+    const saveVocab = () => { const w=$('#vWord').value.trim(),m=$('#vMean').value.trim(); if(!w||!m)return showToast('Nhập từ và nghĩa','e'); const id=$('#editVocabId').value; const d={topicId:$('#vTopic').value,word:w,ipa:$('#vIpa').value.trim(),partOfSpeech:$('#vPos').value,vietnameseMeaning:m,synonym:$('#vSyn').value.trim(),example:$('#vEx').value.trim()}; if(id){const v=state.vocab.find(x=>x.id===id);if(v)Object.assign(v,d);}else{state.vocab.push({id:Date.now().toString(),...d,isStarred:false,createdAt:Date.now()});} save(); closeModal('vocabModal'); renderVocab(); updDash(); showToast('Đã lưu'); };
+    const delVocab = id => { if(!confirm('Xóa từ?'))return; state.vocab=state.vocab.filter(x=>x.id!==id); state.learned=state.learned.filter(x=>x!==id); save(); renderVocab(); updDash(); showToast('Đã xóa'); };
+    const toggleStar = id => { const v=state.vocab.find(x=>x.id===id); if(v)v.isStarred=!v.isStarred; save(); renderVocab(); renderStarred(); };
+    const renderVocab = () => { let l=[...state.vocab]; const s=$('#searchInput')?.value.toLowerCase()||''; const tf=$('#filterTopic')?.value||''; const pf=$('#filterPos')?.value||''; if(s)l=l.filter(v=>v.word.toLowerCase().includes(s)||v.vietnameseMeaning.includes(s)); if(tf)l=l.filter(v=>v.topicId===tf); if(pf)l=l.filter(v=>v.partOfSpeech===pf); l.sort((a,b)=>state.sort.d?(b.createdAt-a.createdAt):(a.createdAt-b.createdAt)); const tp=Math.ceil(l.length/state.size)||1; if(state.page>tp)state.page=tp; const st=(state.page-1)*state.size, page=l.slice(st,st+state.size); const tb=$('#vocabTableBody'); if(!l.length)tb.innerHTML='<tr><td colspan="10" class="p-8 text-center text-gray-500">Không có từ</td></tr>'; else tb.innerHTML=page.map((v,i)=>{const t=state.topics.find(x=>x.id===v.topicId);return `<tr><td class="p-3 border-b">${st+i+1}</td><td class="p-3 border-b">${t?`<span class="badge text-white" style="background:${t.color}">${t.name}</span>`:'-'}</td><td class="p-3 border-b font-semibold">${v.word}</td><td class="p-3 border-b hidden md:table-cell font-mono text-sm text-gray-500">${v.ipa||'-'}</td><td class="p-3 border-b"><span class="badge bg-indigo-100 text-indigo-600">${v.partOfSpeech||'-'}</span></td><td class="p-3 border-b">${v.vietnameseMeaning}</td><td class="p-3 border-b hidden lg:table-cell text-gray-500 italic">"${v.example||'-'}"</td><td class="p-3 border-b text-center"><button onclick="speakWord('${v.word}')" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">🔊</button></td><td class="p-3 border-b text-center"><button onclick="toggleStar('${v.id}')" class="text-lg transition ${v.isStarred?'star-active':'text-gray-300'}">${v.isStarred?'⭐':'☆'}</button></td><td class="p-3 border-b text-center"><button onclick="openVocabModal('${v.id}')" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 mr-1">✏️</button><button onclick="delVocab('${v.id}')" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">🗑️</button></td></tr>`;}).join(''); $('#paginationInfo').textContent=`${st+1}-${Math.min(st+state.size,l.length)}/${l.length}`; };
+    const changePage = d => { state.page+=d; renderVocab(); };
+    let st; const handleSearch = v => { clearTimeout(st); st=setTimeout(()=>{state.page=1;renderVocab();},300); };
+
+    // ===== STARRED =====
+    const renderStarred = () => { const s=state.vocab.filter(v=>v.isStarred), c=$('#starredList'); if(!s.length)return c.innerHTML='<p class="col-span-full text-center py-8 text-gray-500">Chưa đánh dấu ⭐</p>'; c.innerHTML=s.map(v=>{const t=state.topics.find(x=>x.id===v.topicId);return `<div class="card p-4"><div class="flex justify-between mb-2"><span class="font-semibold">${v.word}</span><button onclick="toggleStar('${v.id}')" class="star-active">⭐</button></div><div class="text-sm text-gray-500 font-mono mb-1">${v.ipa||''}</div><div class="text-indigo-500 font-medium">${v.vietnameseMeaning}</div><div class="text-xs text-gray-400 mt-1">${v.synonym||''}</div>${v.example?`<div class="text-xs text-gray-500 italic mt-1">"${v.example}"</div>`:''}<div class="flex gap-2 mt-3"><button onclick="speakWord('${v.word}')" class="btn-outline text-xs px-3 py-1.5">🔊 Nghe</button>${t?`<span class="badge text-white" style="background:${t.color}">${t.name}</span>`:''}</div></div>`;}).join(''); };
+
+    // ===== FLASHCARDS =====
+    const initFC = () => { state.fc=state.vocab.filter(v=>v.isStarred); state.fcIdx=0; if(!state.fc.length){$('#noFlashcards').classList.remove('hidden');$('#flashcardActive').classList.add('hidden');}else{$('#noFlashcards').classList.add('hidden');$('#flashcardActive').classList.remove('hidden');renderFC();} };
+    const renderFC = () => { const v=state.fc[state.fcIdx]; $('#fcWord').textContent=v.word;$('#fcIpa').textContent=v.ipa||'';$('#fcMeaning').textContent=v.vietnameseMeaning;$('#fcExample').textContent=v.example||'';$('#flipCard').classList.remove('flipped');$('#fcProgress').textContent=`${state.fcIdx+1}/${state.fc.length}`;$('#fcProgressBar').style.width=`${(state.fcIdx+1)/state.fc.length*100}%`; };
+    const flipCard = () => $('#flipCard').classList.toggle('flipped');
+    const navigateFC = d => { state.fcIdx+=d; if(state.fcIdx<0)state.fcIdx=state.fc.length-1; if(state.fcIdx>=state.fc.length)state.fcIdx=0; renderFC(); };
+    const shuffleFC = () => { for(let i=state.fc.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[state.fc[i],state.fc[j]]=[state.fc[j],state.fc[i]];} state.fcIdx=0; renderFC(); showToast('Đã trộn'); };
+    const markLearned = () => { if(!state.fc.length)return; const v=state.fc[state.fcIdx]; if(!state.learned.includes(v.id))state.learned.push(v.id); save(); showToast('Đã thuộc ✅'); navigateFC(1); };
+    document.addEventListener('keydown',e=>{if($('#flashcards').classList.contains('active')){if(e.key==='ArrowLeft')navigateFC(-1);if(e.key==='ArrowRight')navigateFC(1);if(e.key===' '){e.preventDefault();flipCard();}}});
+
+    // ===== QUIZ =====
+    const initQuiz = () => { const s=state.vocab.filter(v=>v.isStarred); $('#quizWordCount').textContent=`${s.length} từ`; $('#quizStartBtn').disabled=s.length<4; $('#quizSetup').classList.remove('hidden'); $('#quizActive').classList.add('hidden'); $('#quizResult').classList.add('hidden'); };
+    const startQuiz = () => { const s=state.vocab.filter(v=>v.isStarred); if(s.length<4)return showToast('Cần ≥4 từ ⭐','e'); const cnt=Math.min(parseInt($('#quizCount').value),s.length); const type=$$('input[name="qtype"]')[0].checked.value; state.q=[];state.qIdx=0;state.qScore=0;state.qTime=0; clearInterval(state.qTimer); const sh=[...s].sort(()=>Math.random()-0.5).slice(0,cnt); sh.forEach(v=>{let q={word:v.word,correct:'',question:'',options:[]}; const o=state.vocab.filter(x=>x.id!==v.id).sort(()=>Math.random()-0.5).slice(0,3); if(type==='meaning'){q.correct=v.vietnameseMeaning;q.question=`"${v.word}" nghĩa là?`;q.options=[v.vietnameseMeaning,...o.map(x=>x.vietnameseMeaning)];}else if(type==='synonym'&&v.synonym){q.correct=v.synonym;q.question=`Đồng nghĩa "${v.word}"?`;q.options=[v.synonym,...o.map(x=>x.synonym||'N/A')];}else if(type==='fillblank'){const ex=v.example||`The ${v.word} is important.`;q.correct=v.word;q.question=ex.replace(new RegExp(v.word,'gi'),'_______');q.options=[v.word,...o.map(x=>x.word)];}else{q.correct=v.word;q.question='Nghe và chọn:';q.options=[v.word,...o.map(x=>x.word)];q.audio=true;} state.q.push({question:q.question,correct:q.correct,options:q.options.sort(()=>Math.random()-0.5),audio:q.audio});}); $('#quizSetup').classList.add('hidden');$('#quizActive').classList.remove('hidden'); state.qTimer=setInterval(()=>{state.qTime++;$('#quizTimer').textContent=`⏱ ${String(Math.floor(state.qTime/60)).padStart(2,'0')}:${String(state.qTime%60).padStart(2,'0')}`;},1000); showQ(); };
+    const showQ = () => { if(state.qIdx>=state.q.length)return finishQ(); const q=state.q[state.qIdx]; $('#quizCurrentQ').textContent=`Câu ${state.qIdx+1}/${state.q.length}`; $('#quizProgressBar').style.width=`${(state.qIdx+1)/state.q.length*100}%`; $('#quizQuestion').textContent=q.question; if(q.audio)speakWord(q.correct); $('#quizOptions').innerHTML=q.options.map(o=>`<button onclick="ansQ('${o}')" class="w-full text-left p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition">${o}</button>`).join(''); $('#quizFeedback').classList.add('hidden');$('#nextQBtn').classList.add('hidden'); };
+    const ansQ = a => { const q=state.q[state.qIdx]; const ok=a===q.correct; if(ok)state.qScore++; $('#quizOptions').innerHTML=q.options.map(o=>{const c=o===q.correct?'border-green-500 bg-green-50 dark:bg-green-900/30':o===a&&!ok?'border-red-500 bg-red-50 dark:bg-red-900/30':'border-gray-200 dark:border-gray-700';return `<div class="w-full p-3 rounded-xl border-2 ${c}">${o} ${o===q.correct?'✅':o===a&&!ok?'❌':''}</div>`;}).join(''); const f=$('#quizFeedback'); f.textContent=ok?'✅ Chính xác!':`❌ Đáp án: ${q.correct}`; f.className=`mt-4 text-center font-semibold text-lg ${ok?'text-green-500':'text-red-500'}`; f.classList.remove('hidden'); $('#nextQBtn').classList.remove('hidden'); };
+    const nextQ = () => { state.qIdx++; showQ(); };
+    const finishQ = () => { clearInterval(state.qTimer); $('#quizActive').classList.add('hidden'); $('#quizResult').classList.remove('hidden'); const p=Math.round(state.qScore/state.q.length*100); $('#resultScore').textContent=`${state.qScore}/${state.q.length}`; $('#resultMsg').textContent=p>=80?'🌟 Xuất sắc!':p>=60?'👍 Khá tốt!':'💪 Hãy ôn lại!'; $('#resultEmoji').textContent=p>=80?'🎉':p>=60?'😊':'📚'; state.history.push({score:p,completedAt:Date.now()}); save(); if(p>=70)showConfetti(); };
+    const generateQuiz = () => { initQuiz(); showPage('quiz'); };
+
+    // ===== DASHBOARD & PROGRESS =====
+    const updDash = () => { $('#totalWords').textContent=state.vocab.length; $('#learnedWords').textContent=state.learned.length; $('#starredCount').textContent=state.vocab.filter(v=>v.isStarred).length; const avg=state.history.length?Math.round(state.history.reduce((a,b)=>a+b.score,0)/state.history.length):0; $('#avgScore').textContent=`${avg}%`; const days=['T2','T3','T4','T5','T6','T7','CN']; let h=''; for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const c=state.vocab.filter(v=>v.createdAt>=d.setHours(0,0,0,0)).length;const ht=Math.max(8,Math.min(c*4,140));h+=`<div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t-lg bg-gradient-to-t from-indigo-500 to-purple-400" style="height:${ht}px"></div><span class="text-xs text-gray-500">${days[i]}</span></div>`;}$('#weeklyChart').innerHTML=h; let stk=0; for(let i=0;i<365;i++){const k=new Date();k.setDate(k.getDate()-i).toISOString().slice(0,10);if(state.history.some(q=>new Date(q.completedAt).toISOString().slice(0,10)===k))stk++;else break;}$('#streakDays').textContent=stk; };
+    const updProg = () => { $('#topicProgress').innerHTML=state.topics.map(t=>{const tot=state.vocab.filter(v=>v.topicId===t.id).length;const l=state.vocab.filter(v=>v.topicId===t.id&&state.learned.includes(v.id)).length;const p=tot?Math.round(l/tot*100):0;return `<div class="flex items-center gap-3"><span class="badge text-white min-w-[80px]" style="background:${t.color}">${t.name}</span><div class="flex-1"><div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div></div><span class="text-sm text-gray-500 w-10 text-right">${p}%</span></div>`;}).join('')||'<p class="text-gray-500">Chưa có dữ liệu</p>'; const rh=state.history.slice(-10).reverse(); $('#quizHistory').innerHTML=rh.length?rh.map(q=>{const d=new Date(q.completedAt);return `<div class="flex justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><span class="text-sm">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span><span class="font-semibold ${q.score>=70?'text-green-500':'text-orange-500'}">${q.score}%</span></div>`;}).join(''):'<p class="text-gray-500">Chưa làm quiz</p>'; };
+
+    // ===== SETTINGS & DEMO =====
+    const exportData = () => { const b=new Blob([JSON.stringify({v:state.vocab,t:state.topics,h:state.history,l:state.learned},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`vocab_${Date.now()}.json`;a.click(); showToast('Xuất thành công'); };
+    const importData = e => { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{try{const d=JSON.parse(r.result);state.vocab=d.v||[];state.topics=d.t||[];state.history=d.h||[];state.learned=d.l||[];save();showToast('Nhập thành công');showPage('dashboard');}catch{showToast('File lỗi','e')}}; r.readAsText(f); };
+    const loadDemo = () => { state.topics=[{id:'t1',name:'IELTS Speaking',color:'#fbcfe8',createdAt:Date.now()},{id:'t2',name:'TOEIC Business',color:'#bfdbfe',createdAt:Date.now()},{id:'t3',name:'Education',color:'#bbf7d0',createdAt:Date.now()},{id:'t4',name:'Travel',color:'#fed7aa',createdAt:Date.now()}]; state.vocab=[{id:'v1',topicId:'t1',word:'accommodate',ipa:'/əˈkɑːmədeɪt/',partOfSpeech:'Verb',vietnameseMeaning:'Đáp ứng, cung cấp chỗ ở',synonym:'provide, house',example:'The hotel can accommodate 200 guests.',isStarred:true,createdAt:Date.now()-86400000},{id:'v2',topicId:'t1',word:'ambiguous',ipa:'/æmˈbɪɡjuəs/',partOfSpeech:'Adjective',vietnameseMeaning:'Mơ hồ, không rõ ràng',synonym:'vague, unclear',example:'His answer was ambiguous.',isStarred:false,createdAt:Date.now()-172800000},{id:'v3',topicId:'t2',word:'negotiate',ipa:'/nɪˈɡoʊʃieɪt/',partOfSpeech:'Verb',vietnameseMeaning:'Đàm phán, thương lượng',synonym:'discuss, bargain',example:'We need to negotiate the terms.',isStarred:true,createdAt:Date.now()-259200000},{id:'v4',topicId:'t2',word:'revenue',ipa:'/ˈrevənuː/',partOfSpeech:'Noun',vietnameseMeaning:'Doanh thu',synonym:'income, earnings',example:'The company revenue increased by 20%.',isStarred:false,createdAt:Date.now()-345600000},{id:'v5',topicId:'t3',word:'curriculum',ipa:'/kəˈrɪkjələm/',partOfSpeech:'Noun',vietnameseMeaning:'Chương trình giảng dạy',synonym:'syllabus, program',example:'The school updated its curriculum.',isStarred:true,createdAt:Date.now()-432000000},{id:'v6',topicId:'t4',word:'itinerary',ipa:'/aɪˈtɪnəreri/',partOfSpeech:'Noun',vietnameseMeaning:'Lịch trình du lịch',synonym:'schedule, plan',example:'Please check your travel itinerary.',isStarred:true,createdAt:Date.now()-518400000},{id:'v7',topicId:'t3',word:'pedagogy',ipa:'/ˈpedəɡɑːdʒi/',partOfSpeech:'Noun',vietnameseMeaning:'Phương pháp giảng dạy',synonym:'teaching',example:'Modern pedagogy focuses on students.',isStarred:false,createdAt:Date.now()-604800000},{id:'v8',topicId:'t4',word:'excursion',ipa:'/ɪkˈskɜːrʒn/',partOfSpeech:'Noun',vietnameseMeaning:'Chuyến tham quan',synonym:'trip',example:'We went on an excursion.',isStarred:false,createdAt:Date.now()-691200000},{id:'v9',topicId:'t1',word:'comprehensive',ipa:'/ˌkɑːmprɪˈhensɪv/',partOfSpeech:'Adjective',vietnameseMeaning:'Toàn diện',synonym:'thorough',example:'Comprehensive review needed.',isStarred:true,createdAt:Date.now()-777600000},{id:'v10',topicId:'t2',word:'deadline',ipa:'/ˈdedlaɪn/',partOfSpeech:'Noun',vietnameseMeaning:'Hạn chót',synonym:'time limit',example:'Deadline is next Friday.',isStarred:false,createdAt:Date.now()-864000000}]; state.learned=['v5','v9']; state.history=[{score:80,completedAt:Date.now()-86400000},{score:100,completedAt:Date.now()-172800000},{score:60,completedAt:Date.now()-259200000}]; save(); showToast('Đã tải demo'); showPage('dashboard'); };
+    const clearAll = () => { if(!confirm('Xóa TẤT CẢ?'))return; state={vocab:[],topics:[],history:[],learned:[],settings:{dark:false},page:1,size:20,sort:{f:'createdAt',d:true},fc:[],fcIdx:0,q:[],qIdx:0,qScore:0,qTime:0,qTimer:null}; save(); showToast('Đã xóa'); showPage('dashboard'); };
+    const closeModal = id => document.getElementById(id).classList.remove('show');
+    window.addEventListener('resize',()=>{if(window.innerWidth<768){closeSidebar();document.documentElement.classList.remove('sidebar-collapsed');}else if(ls('sidebarCollapsed')==='true')document.documentElement.classList.add('sidebar-collapsed');});
+    if(state.settings.dark)document.documentElement.classList.add('dark');
+    $('#themeIconDesktop').textContent=state.settings.dark?'☀️':'🌙'; $('#themeToggleBtn').textContent=state.settings.dark?'Tắt':'Bật';
+    showPage('dashboard');
+  </script>
+</body>
+</html>
