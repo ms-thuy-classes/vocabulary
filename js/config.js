@@ -30,4 +30,23 @@ export {
   signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, signOut, onAuthStateChanged 
 } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
-export { GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+// ✅ ĐÚNG (chỉ export 1 lần):
+import { 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider,  // ← Export 1 lần duy nhất ở đây
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+
+export { 
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+};
