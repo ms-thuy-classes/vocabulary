@@ -1,4 +1,4 @@
-// Firebase Config - Replace with your actual config
+// Firebase Config
 export const firebaseConfig = {
   apiKey: "AIzaSyCt1a3SGuac8srDDC76T2I1yGla8tpfbPg",
   authDomain: "vocab-64644.firebaseapp.com",
@@ -9,39 +9,16 @@ export const firebaseConfig = {
   appId: "1:1234567890:web:abcdef123456"
 };
 
-export const DB_PATHS = {
-  USER: (uid) => `users/${uid}`,
-  DATA: (uid) => `users/${uid}/data`,
-  PROFILE: (uid) => `users/${uid}/profile`
-};
-
 // Initialize Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
-import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
-import { getAuth } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
-
 export const app = initializeApp(firebaseConfig);
+
+// Database
+import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
 export const db = getDatabase(app);
-export const auth = getAuth(app);
 
-// Export Firebase functions for use in other modules
-export { 
-  ref, set, get, onValue, push, update, remove, serverTimestamp,
-  signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, signOut, onAuthStateChanged 
-} from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
-// ✅ ĐÚNG (chỉ export 1 lần):
+// Auth - IMPORT 1 LẦN DUY NHẤT
 import { 
-  getAuth, 
-  signInWithPopup, 
-  GoogleAuthProvider,  // ← Export 1 lần duy nhất ở đây
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
-
-export { 
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
@@ -49,4 +26,28 @@ export {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged
+} from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+
+export const auth = getAuth(app);
+
+// Export các functions (KHÔNG export lại getAuth)
+export {
+  signInWithPopup,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
 };
+
+// Database functions
+export {
+  ref,
+  set,
+  get,
+  onValue,
+  push,
+  update,
+  remove,
+  serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
